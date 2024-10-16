@@ -1,4 +1,3 @@
-
 spring:
   datasource:
     url: jdbc:h2:tcp://localhost/~/test
@@ -11,3 +10,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+    defer-datasource-initialization: true
+  sql:
+    init:
+      mode: always
