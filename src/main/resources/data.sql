@@ -1,4 +1,4 @@
-insert into "member" (member_id, username, password, social_type, name, nickname, email, permission, profile_pic_url, count_attempt, unban_date, created_at, updated_at) values
+insert into `member` (member_id, username, password, social_type, name, nickname, email, permission, profile_pic_url, count_attempt, unban_date, created_at, updated_at) values
 	(1, 'super', '$2b$12$r.c/Bx9E5G8U8dSrHa4my.QzPd5bSFyHi.2O2N1ZDMzLi5tSVW8eK', 'NORMAL', '송은주', '최상위', 'dgim@example.com', 'SUPER', null, 0, current_date, now(), now()),
 	(2, 'admin1', '$2b$12$6m3VRnYCF1BCtVTspxycQeMOmr6XgGVTqaJnFDGehuDtjyN0ePFK.', 'NORMAL', '주민재', '관리자1', 'vi@example.net', 'ADMIN', null, 0, current_date, now(), now()),
 	(3, 'admin2', '$2b$12$klhAP7zOjLxfkYzfXsyjRugrgVZ7cbntNxCEjK9RZaWAeKvK41xN2', 'NORMAL', '김채원', '관리자2', 'sunja20@example.com', 'ADMIN', null, 0, current_date, now(), now()),
@@ -9,7 +9,7 @@ insert into "member" (member_id, username, password, social_type, name, nickname
 	(8, 'member4', '$2b$12$jW7q/UIHGbjUpQOMmMILkOY3QFPr/TUPiaE2EK1iseEw8qanRo.Nm', 'NORMAL', '김민석',  '회원4', 'tbag@example.com', 'MEMBER', null, 0, current_date, now(), now()),
 	(9, 'member5', '$2b$12$4TRAMzCm3RUnhV0bZzZ94e5N84XbjhKYx/8jqMNyHR1P4CYFjwbEi', 'NORMAL', '손옥순',  '회원5', 'gyeongjai@example.com', 'MEMBER', 'https://culturabcs.gob.mx/defaults/profile.png', 0, current_date, now(), now());
 
-insert into "follow" (follow_id, following, followed, created_at, updated_at) values
+insert into `follow` (follow_id, following, followed, created_at, updated_at) values
 	(1, 5, 6, now(), now()),
 	(2, 5, 7, now(), now()),
 	(3, 5, 8, now(), now()),
