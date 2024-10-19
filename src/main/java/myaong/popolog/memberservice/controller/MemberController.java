@@ -1,8 +1,9 @@
 package myaong.popolog.memberservice.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import myaong.popolog.memberservice.common.exception.ApiResponse;
-import myaong.popolog.memberservice.dto.request.MemberRequest;
 import myaong.popolog.memberservice.dto.response.MemberResponse;
 import myaong.popolog.memberservice.service.MemberQueryService;
 import org.springframework.web.bind.annotation.*;
@@ -13,33 +14,39 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
     private final MemberQueryService memberQueryService;
 
-    @GetMapping
+    @Operation(summary = "API 명세서 v0.3 line 15", description = "현재 로그인한 회원의 정보 조회")
+    @GetMapping("/me")
     public ApiResponse<MemberResponse.BasicInfoDTO> getMemberBasicInfo() {
         return ApiResponse.onSuccess(memberQueryService.getMemberBasicInfo());
     }
 
+    @Operation(summary = "API 명세서 v0.3 line 16", description = "memberId로 회원 정보 조회")
     @GetMapping("/{memberId}")
-    public ApiResponse<MemberResponse.BasicInfoDTO> getMemberBasicInfoByMemberId(@PathVariable Long memberId) {
-        return null;
+    public ApiResponse<MemberResponse.PartialInfoDTO> getMemberPartialInfoByMemberId(@PathVariable Long memberId) {
+        return ApiResponse.onSuccess(memberQueryService.getMemberPartialInfoByMemberId(memberId));
     }
 
-    @GetMapping("/{username}")
-    public ApiResponse<MemberResponse.BasicInfoDTO> getMemberBasicInfoByUsername(@PathVariable String username) {
-        return null;
+    @Operation(summary = "API 명세서 v0.3 line 17", description = "username으로 회원 정보 조회")
+    @GetMapping
+    public ApiResponse<MemberResponse.PartialInfoDTO> getMemberPartialInfoByUsername(@RequestParam(required = false) String username) {
+        return ApiResponse.onSuccess(memberQueryService.getMemberPartialInfoByUsername("admin1"));
     }
 
+    @Operation(summary = "API 명세서 v0.3 line 22", description = "회원 정보 조회 (블로그 접속 시)")
     @GetMapping("/{memberId}/info")
-    public ApiResponse<MemberResponse.BlogInfoDTO> getMemberBlogInfo(@PathVariable Long memberId) {
+    public ApiResponse<MemberResponse.BlogInfoDTO> getMemberBlogInfo(@Parameter(required = false) @PathVariable(required = false) Long memberId) {
         return null;
     }
 
-    @GetMapping("/following")
-    public ApiResponse<MemberResponse.BlogInfoDTO> getMemberFollowingList(@RequestBody MemberRequest.FollowPageRequestDTO pageRequest) {
+    @Operation(summary = "API 명세서 v0.3 line 24", description = "팔로잉 조회 (무한 스크롤)")
+    @GetMapping("/{memberId}/following/{lastId}")
+    public ApiResponse<MemberResponse.BlogInfoDTO> getMemberFollowingList(@Parameter(required = false) @PathVariable Long memberId, @Parameter(required = false) @PathVariable Long lastId) {
         return null;
     }
 
-    @GetMapping("/followed")
-    public ApiResponse<MemberResponse.BlogInfoDTO> getMemberFollowedList(@RequestBody MemberRequest.FollowPageRequestDTO pageRequest) {
+    @Operation(summary = "API 명세서 v0.3 line 25", description = "팔로워 조회 (무한 스크롤)")
+    @GetMapping("/{memberId}/followed/{lastId}")
+    public ApiResponse<MemberResponse.BlogInfoDTO> getMemberFollowedList(@PathVariable Long memberId, @PathVariable Long lastId) {
         return null;
     }
 }

@@ -11,7 +11,7 @@ import java.util.List;
 
 @Configuration
 @OpenAPIDefinition(
-        info = @Info(title = "API Document", description = "MAIL SERVICE 명세서", version = "v3")
+        info = @Info(title = "Popolog Member Service API Document", description = "Popolog Member Service 명세서", version = "v3")
 )
 public class SwaggerConfig {
 

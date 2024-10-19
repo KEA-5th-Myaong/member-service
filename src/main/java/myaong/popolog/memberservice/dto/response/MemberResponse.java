@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MemberResponse {
-    //
+    // 기본 회원 정보
     @Builder
     @Getter
     @NoArgsConstructor
@@ -23,6 +23,16 @@ public class MemberResponse {
         private String email;
         private String profilePicUrl;
         private Permission permission;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PartialInfoDTO {
+        private Long memberId;
+        private String username;
+        private String nickname;
     }
 
     // 블로그 접속 시 응답
