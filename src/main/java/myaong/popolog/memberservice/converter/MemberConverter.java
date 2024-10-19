@@ -25,4 +25,15 @@ public class MemberConverter {
                 .build();
 
     }
+
+    public static MemberResponse.BlogInfoDTO toBlogInfoDTO(Member member) {
+        return MemberResponse.BlogInfoDTO.builder()
+                .memberId(member.getId())
+                .nickname(member.getNickname())
+                .followingCount(10)
+                .followerCount(15)
+                .profilePicUrl("https://ibb.co/6vnYLfR")
+                .build();
+
+    }
 }

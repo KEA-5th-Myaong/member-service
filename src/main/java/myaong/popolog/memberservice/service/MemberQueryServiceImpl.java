@@ -35,6 +35,12 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     }
 
     @Override
+    public MemberResponse.BlogInfoDTO getMemberBlogInfo(Long memberId) {
+        Member findMember = findMemberByMemberId(memberId);
+        return MemberConverter.toBlogInfoDTO(findMember);
+    }
+
+    @Override
     public Member findMemberByMemberId(Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new ApiException(ApiCode.MEMBER_NOT_FOUND));

@@ -34,19 +34,19 @@ public class MemberController {
 
     @Operation(summary = "API 명세서 v0.3 line 22", description = "회원 정보 조회 (블로그 접속 시)")
     @GetMapping("/{memberId}/info")
-    public ApiResponse<MemberResponse.BlogInfoDTO> getMemberBlogInfo(@Parameter(required = false) @PathVariable(required = false) Long memberId) {
-        return null;
+    public ApiResponse<MemberResponse.BlogInfoDTO> getMemberBlogInfo(@PathVariable(required = false) Long memberId) {
+        return ApiResponse.onSuccess(memberQueryService.getMemberBlogInfo(memberId));
     }
 
     @Operation(summary = "API 명세서 v0.3 line 24", description = "팔로잉 조회 (무한 스크롤)")
     @GetMapping("/{memberId}/following/{lastId}")
-    public ApiResponse<MemberResponse.BlogInfoDTO> getMemberFollowingList(@Parameter(required = false) @PathVariable Long memberId, @Parameter(required = false) @PathVariable Long lastId) {
+    public ApiResponse<MemberResponse.BlogInfoDTO> getMemberFollowingList(@PathVariable(required = false) Long memberId, @PathVariable Long lastId) {
         return null;
     }
 
     @Operation(summary = "API 명세서 v0.3 line 25", description = "팔로워 조회 (무한 스크롤)")
     @GetMapping("/{memberId}/followed/{lastId}")
-    public ApiResponse<MemberResponse.BlogInfoDTO> getMemberFollowedList(@PathVariable Long memberId, @PathVariable Long lastId) {
+    public ApiResponse<MemberResponse.BlogInfoDTO> getMemberFollowedList(@PathVariable(required = false) Long memberId, @PathVariable Long lastId) {
         return null;
     }
 }
