@@ -42,8 +42,7 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0' // SQL 쿼리 파라미터 값 로그로 보여주는 라이브러리
 
-    // Swagger(Spring 3.x.x 이상부터 SpringFox 대신, SpringDoc)
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.2'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
 
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
