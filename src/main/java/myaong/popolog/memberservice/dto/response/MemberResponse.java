@@ -19,6 +19,7 @@ public class MemberResponse {
         private Long memberId;
         private String username;
         private String name;
+        private String nickname;
         private String email;
         private String profilePicUrl;
         private Permission permission;
