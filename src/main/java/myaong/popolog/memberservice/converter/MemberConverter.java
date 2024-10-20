@@ -1,6 +1,7 @@
 package myaong.popolog.memberservice.converter;
 
 import myaong.popolog.memberservice.dto.response.MemberResponse;
+import myaong.popolog.memberservice.entity.Follow;
 import myaong.popolog.memberservice.entity.Member;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +39,13 @@ public class MemberConverter {
                 .profilePicUrl("https://ibb.co/6vnYLfR")
                 .build();
 
+    }
+
+    public static Follow toFollow(Member followingMember, Member followedMember) {
+        return Follow.builder()
+               .following(followingMember)
+               .followed(followedMember)
+               .build();
     }
 
     public static MemberResponse.FollowingDTO toFollowingDTO(Member member) {

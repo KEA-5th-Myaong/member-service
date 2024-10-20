@@ -52,6 +52,14 @@ public class MemberResponse {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    public static class FollowDTO {
+        private boolean following;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class FollowingDTO {
         private Long memberId;
         private String nickname;

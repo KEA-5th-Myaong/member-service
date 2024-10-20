@@ -11,12 +11,12 @@ insert into "member" (member_id, username, password, social_type, name, nickname
     (10, 'member6', '$2b$12$4TRAMzCm3RUnhV0bZzZ94e5N84XbjhKYx/8jqMNyHR1P4CYFjwbEi', 'NORMAL', '백지선',  '회원6', 'jiseon@example.com', 'MEMBER', 'https://culturabcs.gob.mx/defaults/profile.png', 0, current_date, now(), now());
 
 insert into "follow" (follow_id, following, followed, created_at, updated_at) values
-	(1, 5, 6, now(), now()),
-	(2, 5, 7, now(), now()),
-	(3, 5, 8, now(), now()),
-	(4, 6, 5, now(), now()),
-	(5, 6, 7, now(), now()),
-	(6, 7, 6, now(), now()),
-	(7, 8, 6, now(), now()),
-	(8, 9, 5, now(), now());
+	(10, 5, 6, now(), now()),
+	(11, 5, 7, now(), now()),
+	(12, 5, 8, now(), now()),
+	(13, 6, 5, now(), now()),
+	(14, 6, 7, now(), now()),
+	(15, 7, 6, now(), now()),
+	(16, 8, 6, now(), now()),
+	(17, 9, 5, now(), now());
 

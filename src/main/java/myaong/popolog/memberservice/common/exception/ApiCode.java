@@ -16,6 +16,7 @@ public enum ApiCode {
 	DB_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON_5001", "DB Error"),
 
 	RE_AUTHENTICATION_FAILURE(HttpStatus.BAD_REQUEST, "MEMBER_4000", "기존 비밀번호와 일치하지 않습니다."),
+	ALREADY_FOLLOWING(HttpStatus.BAD_REQUEST, "MEMBER_4001", "이미 팔로우 중인 회원입니다."),
 	INCORRECT_ID(HttpStatus.UNAUTHORIZED, "MEMBER_4010", "아이디가 맞지 않습니다. 다시 시도해주세요."),
 	INCORRECT_PASSWORD(HttpStatus.UNAUTHORIZED, "MEMBER_4011", "비밀번호가 맞지 않습니다. 다시 시도해주세요."),	// 재시도 횟수를 함께 전송
 	MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_4040", "존재하지 않는 회원입니다."),
