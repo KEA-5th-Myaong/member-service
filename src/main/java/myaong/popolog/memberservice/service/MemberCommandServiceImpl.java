@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import myaong.popolog.memberservice.common.exception.ApiCode;
 import myaong.popolog.memberservice.common.exception.ApiException;
 import myaong.popolog.memberservice.converter.MemberConverter;
+import myaong.popolog.memberservice.dto.request.MemberRequest;
 import myaong.popolog.memberservice.dto.response.MemberResponse;
 import myaong.popolog.memberservice.entity.Follow;
 import myaong.popolog.memberservice.entity.Member;
@@ -26,15 +27,24 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
         boolean isExist = followRepository.existsByFollowingAndFollowed(followingMember, followedMember);
 
+        MemberResponse.FollowDTO followDTO;
+
+        // 팔로우 내역이 이미 존재하면 팔로우 취소
         if (isExist) {
-            throw new ApiException(ApiCode.ALREADY_FOLLOWING);
+            followRepository.deleteByFollowingAndFollowed(followingMember, followedMember);
+            followDTO = MemberConverter.toFollowDTO(false);
+
+        } else { // 새로 팔로우 정보 등록
+            Follow follow = MemberConverter.toFollow(followingMember, followedMember);
+            followRepository.save(follow);
+            followDTO = MemberConverter.toFollowDTO(true);
         }
 
-        Follow follow = MemberConverter.toFollow(followingMember, followedMember);
-        followRepository.save(follow);
+        return followDTO;
+    }
 
-        return MemberResponse.FollowDTO.builder()
-                .following(true)
-                .build();
+    @Override
+    public void editBasicInfo(MemberRequest.editBasicInfoDTO request) {
+
     }
 }

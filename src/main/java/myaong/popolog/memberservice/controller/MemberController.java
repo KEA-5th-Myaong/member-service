@@ -2,8 +2,11 @@ package myaong.popolog.memberservice.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import myaong.popolog.memberservice.common.exception.ApiResponse;
+import myaong.popolog.memberservice.converter.MemberConverter;
+import myaong.popolog.memberservice.dto.request.MemberRequest;
 import myaong.popolog.memberservice.dto.response.MemberResponse;
 import myaong.popolog.memberservice.service.MemberCommandService;
 import myaong.popolog.memberservice.service.MemberQueryService;
@@ -32,6 +35,24 @@ public class MemberController {
     @GetMapping
     public ApiResponse<MemberResponse.PartialInfoDTO> getMemberPartialInfoByUsername(@RequestParam(required = false, defaultValue = "admin1") String username) {
         return ApiResponse.onSuccess(memberQueryService.getMemberPartialInfoByUsername(username));
+    }
+
+    @Operation(summary = "API 명세서 v0.3 line 18", description = "개인정보 수정 시 비밀번호 일치 확인")
+    @PostMapping("/check-password")
+    public ApiResponse checkPassword(/* @RequestBody @Valid MemberRequest.CheckPasswordDTO request */) {
+        return ApiResponse.onSuccess(true);
+    }
+
+    @Operation(summary = "API 명세서 v0.3 line 19", description = "프로필 사진 수정")
+    @PostMapping("/profile-pic")
+    public ApiResponse<MemberResponse.updateProfilePicDTO> editProfilePic(/* MultipartFile file */) {
+        return ApiResponse.onSuccess(MemberConverter.toUpdateProfilePicDTO());
+    }
+
+    @Operation(summary = "API 명세서 v0.3 line 20", description = "기본 정보 수정")
+    @PostMapping
+    public ApiResponse editBasicInfo(/* @RequestBody @Valid MemberRequest.editBasicInfoDTO request */) {
+        return ApiResponse.onSuccess(null);
     }
 
     @Operation(summary = "API 명세서 v0.3 line 22", description = "회원 정보 조회 (블로그 접속 시)")

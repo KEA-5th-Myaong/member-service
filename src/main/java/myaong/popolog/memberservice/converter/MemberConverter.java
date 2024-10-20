@@ -30,13 +30,19 @@ public class MemberConverter {
 
     }
 
+    public static MemberResponse.updateProfilePicDTO toUpdateProfilePicDTO() {
+        return MemberResponse.updateProfilePicDTO.builder()
+               .profilePicUrl("https://i.ibb.co/jV6hs1v/image.jpg") // 이미지 하드 코딩
+               .build();
+    }
+
     public static MemberResponse.BlogInfoDTO toBlogInfoDTO(Member member) {
         return MemberResponse.BlogInfoDTO.builder()
                 .memberId(member.getId())
                 .nickname(member.getNickname())
                 .followingCount(10)
                 .followerCount(15)
-                .profilePicUrl("https://ibb.co/6vnYLfR")
+                .profilePicUrl(member.getProfilePicUrl())
                 .build();
 
     }
@@ -46,6 +52,12 @@ public class MemberConverter {
                .following(followingMember)
                .followed(followedMember)
                .build();
+    }
+
+    public static MemberResponse.FollowDTO toFollowDTO(boolean following) {
+        return MemberResponse.FollowDTO.builder()
+                .following(following)
+                .build();
     }
 
     public static MemberResponse.FollowingDTO toFollowingDTO(Member member) {

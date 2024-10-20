@@ -35,6 +35,14 @@ public class MemberResponse {
         private String nickname;
     }
 
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class updateProfilePicDTO {
+        private String profilePicUrl;
+    }
+
     // 블로그 접속 시 응답
     @Builder
     @Getter
