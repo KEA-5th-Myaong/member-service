@@ -4,6 +4,9 @@ import myaong.popolog.memberservice.dto.response.MemberResponse;
 import myaong.popolog.memberservice.entity.Member;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class MemberConverter {
     public static MemberResponse.BasicInfoDTO toBasicInfoDTO(Member member) {
@@ -35,5 +38,45 @@ public class MemberConverter {
                 .profilePicUrl("https://ibb.co/6vnYLfR")
                 .build();
 
+    }
+
+    public static MemberResponse.FollowingDTO toFollowingDTO(Member member) {
+        return MemberResponse.FollowingDTO.builder()
+                .memberId(member.getId())
+                .nickname(member.getNickname())
+                .profilePicUrl(member.getProfilePicUrl())
+                .isFollowed(true)
+                .build();
+    }
+
+    public static MemberResponse.FollowingListDTO toFollowingListDTO(List<Member> memberList) {
+        List<MemberResponse.FollowingDTO> followingDTOList = memberList.stream()
+                .map(member -> MemberConverter.toFollowingDTO(member))
+                .collect(Collectors.toList());
+
+        return MemberResponse.FollowingListDTO.builder()
+                .lastId(0L)
+                .followingDTOList(followingDTOList)
+                .build();
+    }
+
+    public static MemberResponse.FollowedDTO toFollowedDTO(Member member) {
+        return MemberResponse.FollowedDTO.builder()
+               .memberId(member.getId())
+               .nickname(member.getNickname())
+               .profilePicUrl(member.getProfilePicUrl())
+               .isFollowed(false)
+               .build();
+    }
+
+    public static MemberResponse.FollowedListDTO toFollowedListDTO(List<Member> memberList) {
+        List<MemberResponse.FollowedDTO> followedDTOList = memberList.stream()
+                .map(member -> MemberConverter.toFollowedDTO(member))
+                .collect(Collectors.toList());
+
+        return MemberResponse.FollowedListDTO.builder()
+                .lastId(0L)
+                .followedDTOList(followedDTOList)
+                .build();
     }
 }

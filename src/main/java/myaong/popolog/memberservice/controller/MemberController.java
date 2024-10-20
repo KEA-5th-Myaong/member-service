@@ -40,13 +40,13 @@ public class MemberController {
 
     @Operation(summary = "API 명세서 v0.3 line 24", description = "팔로잉 조회 (무한 스크롤)")
     @GetMapping("/{memberId}/following/{lastId}")
-    public ApiResponse<MemberResponse.BlogInfoDTO> getMemberFollowingList(@PathVariable(required = false) Long memberId, @PathVariable Long lastId) {
-        return null;
+    public ApiResponse<MemberResponse.FollowingListDTO> getMemberFollowingList(@PathVariable(required = false) Long memberId, @PathVariable(required = false) Long lastId) {
+        return ApiResponse.onSuccess(memberQueryService.getMemberFollowingList(memberId, lastId));
     }
 
     @Operation(summary = "API 명세서 v0.3 line 25", description = "팔로워 조회 (무한 스크롤)")
     @GetMapping("/{memberId}/followed/{lastId}")
-    public ApiResponse<MemberResponse.BlogInfoDTO> getMemberFollowedList(@PathVariable(required = false) Long memberId, @PathVariable Long lastId) {
-        return null;
+    public ApiResponse<MemberResponse.FollowedListDTO> getMemberFollowedList(@PathVariable(required = false) Long memberId, @PathVariable(required = false) Long lastId) {
+        return ApiResponse.onSuccess(memberQueryService.getMemberFollowedList(memberId, lastId));
     }
 }

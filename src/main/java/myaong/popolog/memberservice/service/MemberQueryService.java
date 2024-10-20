@@ -9,6 +9,8 @@ public interface MemberQueryService {
     MemberResponse.PartialInfoDTO getMemberPartialInfoByMemberId(Long memberId);
     MemberResponse.PartialInfoDTO getMemberPartialInfoByUsername(String username);
     MemberResponse.BlogInfoDTO getMemberBlogInfo(Long memberId);
+    MemberResponse.FollowingListDTO getMemberFollowingList(Long memberId, Long lastId);
+    MemberResponse.FollowedListDTO getMemberFollowedList(Long memberId, Long lastId);
     Member findMemberByMemberId(Long memberId);
     Member findMemberByUsername(String username);
 }

@@ -10,6 +10,10 @@ import myaong.popolog.memberservice.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -38,6 +42,30 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     public MemberResponse.BlogInfoDTO getMemberBlogInfo(Long memberId) {
         Member findMember = findMemberByMemberId(memberId);
         return MemberConverter.toBlogInfoDTO(findMember);
+    }
+
+    @Override
+    public MemberResponse.FollowingListDTO getMemberFollowingList(Long memberId, Long lastId) {
+        // 1부터 10까지의 ID 리스트 생성
+        List<Long> ids = LongStream.rangeClosed(1, 10)
+                .boxed()
+                .collect(Collectors.toList());
+
+        List<Member> findMemberList = memberRepository.findByIdIn(ids);
+
+        return MemberConverter.toFollowingListDTO(findMemberList);
+    }
+
+    @Override
+    public MemberResponse.FollowedListDTO getMemberFollowedList(Long memberId, Long lastId) {
+        // 1부터 10까지의 ID 리스트 생성
+        List<Long> ids = LongStream.rangeClosed(1, 10)
+                .boxed()
+                .collect(Collectors.toList());
+
+        List<Member> findMemberList = memberRepository.findByIdIn(ids);
+
+        return MemberConverter.toFollowedListDTO(findMemberList);
     }
 
     @Override

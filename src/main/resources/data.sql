@@ -7,7 +7,8 @@ insert into "member" (member_id, username, password, social_type, name, nickname
 	(6, 'member2', '$2b$12$umtmlcBUaSVCcKlPumn7iOm8ez9izvIywc2JY3OpeCVe2LKILQyq.', 'NORMAL', '박은정',  '회원2', 'ojuweon@example.org', 'MEMBER', 'https://culturabcs.gob.mx/defaults/profile.png', 0, current_date, now(), now()),
 	(7, 'member3', '$2b$12$xS3vPyzyn8Ke2.aCSSCy9OhI1qRwZVqWmDzZMMiS5k3uXsjTNzVY2', 'NORMAL', '김현준',  '회원3', 'dgim@example.org', 'MEMBER', 'https://culturabcs.gob.mx/defaults/profile.png', 0, current_date, now(), now()),
 	(8, 'member4', '$2b$12$jW7q/UIHGbjUpQOMmMILkOY3QFPr/TUPiaE2EK1iseEw8qanRo.Nm', 'NORMAL', '김민석',  '회원4', 'tbag@example.com', 'MEMBER', null, 0, current_date, now(), now()),
-	(9, 'member5', '$2b$12$4TRAMzCm3RUnhV0bZzZ94e5N84XbjhKYx/8jqMNyHR1P4CYFjwbEi', 'NORMAL', '손옥순',  '회원5', 'gyeongjai@example.com', 'MEMBER', 'https://culturabcs.gob.mx/defaults/profile.png', 0, current_date, now(), now());
+	(9, 'member5', '$2b$12$4TRAMzCm3RUnhV0bZzZ94e5N84XbjhKYx/8jqMNyHR1P4CYFjwbEi', 'NORMAL', '손옥순',  '회원5', 'gyeongjai@example.com', 'MEMBER', 'https://culturabcs.gob.mx/defaults/profile.png', 0, current_date, now(), now()),
+    (10, 'member6', '$2b$12$4TRAMzCm3RUnhV0bZzZ94e5N84XbjhKYx/8jqMNyHR1P4CYFjwbEi', 'NORMAL', '백지선',  '회원6', 'jiseon@example.com', 'MEMBER', 'https://culturabcs.gob.mx/defaults/profile.png', 0, current_date, now(), now());
 
 insert into "follow" (follow_id, following, followed, created_at, updated_at) values
 	(1, 5, 6, now(), now()),
