@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 public class MemberConverter {
     public static MemberResponse.BasicInfoDTO toBasicInfoDTO(Member member) {
         return MemberResponse.BasicInfoDTO.builder()
+                .memberId(member.getId())
                 .username(member.getUsername())
                 .name(member.getName())
                 .nickname(member.getNickname())
