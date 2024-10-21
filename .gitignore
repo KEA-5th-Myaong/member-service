@@ -38,3 +38,6 @@ out/
 
 # mac os
 .DS_Store
+
+# yml
+*.yml
