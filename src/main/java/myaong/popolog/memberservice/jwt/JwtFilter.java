@@ -12,7 +12,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import myaong.popolog.memberservice.dto.response.TokenDTO;
-import myaong.popolog.memberservice.util.AuthPathList;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -21,7 +20,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Slf4j
-@Component
+//@Component
 public class JwtFilter extends OncePerRequestFilter {
 
     private static final String ACCESS_HEADER = "AccessToken";
@@ -29,17 +28,19 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final String secretKey;
     private final TokenProvider tokenProvider;
+    private final JwtUtil jwtUtil;
 
-    public JwtFilter(@Value("${jwt.secret_key}") String secretKey, TokenProvider tokenProvider) {
+    public JwtFilter(@Value("${jwt.secret_key}") String secretKey, TokenProvider tokenProvider, JwtUtil jwtUtil) {
         this.secretKey = secretKey;
         this.tokenProvider = tokenProvider;
+        this.jwtUtil = jwtUtil;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-//        if (isRequestPassURI(request, response, filterChain)) { // 권한이 필요없는 요청은 필터를 건너뜀
-//            return;
-//        }
+        if (isRequestPassURI(request, response, filterChain)) { // 권한이 필요없는 요청은 필터를 건너뜀
+            filterChain.doFilter(request, response);
+        }
 
         String accessToken = getTokenFromHeader(request, ACCESS_HEADER);
 
@@ -68,17 +69,36 @@ public class JwtFilter extends OncePerRequestFilter {
     // 토큰 유효성 검증이 필요하지 않은 요청 URI라면 필터를 통과
     private boolean isRequestPassURI(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {
         String requestURI = request.getRequestURI();
-        boolean isPassURI = AuthPathList.getAuthWhitelist().stream()
-                .anyMatch(authPath -> authPath.getPath().equals(requestURI));  // 인증을 건너뛰는 URI
 
-        return isPassURI;
+        if (requestURI.equals("/login")) {
+            return true;
+        }
+
+        if (requestURI.equals("/")) {
+            return true;
+        }
+
+        if (requestURI.startsWith("/auth/login")) {
+            return true;
+        }
+
+        if (requestURI.startsWith("/members/v3/api-docs")) {
+            return true;
+        }
+
+        if (request.getRequestURI().startsWith("/favicon.ico")) {
+            return true;
+        }
+
+        return false;
     }
 
     private String getTokenFromHeader(HttpServletRequest request, String headerName) {
         String token = request.getHeader(headerName);
-        log.info("Token from header: {}", token);
+        log.info("originToken from header: {}", token);
         if (token != null && !token.isEmpty()) {
-            return token;
+            // Bearer 제거 <- oAuth2를 이용했다고 명시적으로 붙여주는 타입인데 JWT를 검증하거나 정보를 추출 시 제거해줘야한다.
+            return token.substring(7);
         }
         return null; // 토큰이 없거나 비어있을 경우 null 반환
     }

@@ -13,4 +13,5 @@ public interface MemberQueryService {
     MemberResponse.FollowedListDTO getMemberFollowedList(Long memberId, Long lastId);
     Member findMemberByMemberId(Long memberId);
     Member findMemberByUsername(String username);
+    Member findByProviderId(String providerId);
 }

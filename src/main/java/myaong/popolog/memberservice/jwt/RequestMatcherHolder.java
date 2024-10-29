@@ -20,12 +20,15 @@ public class RequestMatcherHolder {
     private static final List<RequestInfo> REQUEST_INFO_LIST = List.of(
         new RequestInfo(GET, "/**", null),
         new RequestInfo(POST, "/**", null),
+        new RequestInfo(GET, "/", null),
+        new RequestInfo(POST, "/", null),
 
         // auth
         new RequestInfo(POST, "/auth/**", null),
         new RequestInfo(GET, "/auth/**", null),
         new RequestInfo(GET, "/login/**", null),
         new RequestInfo(POST, "/login/**", null),
+        new RequestInfo(GET, "/webjars/**",null),
 
         // user
         new RequestInfo(GET, "/members/**", null),

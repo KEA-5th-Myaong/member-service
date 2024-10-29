@@ -23,8 +23,12 @@ public class Member extends BaseEntity {
 	@Column(name = "member_id")
 	private Long id;
 
+	// 외부 서비스 id
+	@Column(name = "provider_id", unique = true)
+	private String providerId;
+
 	// 로그인 아이디
-	@Column(name = "username", nullable = false, unique = true, updatable = false)
+	@Column(name = "username", unique = true, updatable = false)
 	private String username;
 
 	@Column(name = "password")
@@ -72,9 +76,10 @@ public class Member extends BaseEntity {
 	private List<Follow> followers = new ArrayList<>();
 
 	@Builder
-	public Member(String username, String password, SocialType socialType, String name, String nickname, String email,
+	public Member(String username, String providerId, String password, SocialType socialType, String name, String nickname, String email,
 				  Permission permission, String profilePicUrl, Integer countAttempt, LocalDate unbanDate) {
 		this.username = username;
+		this.providerId = providerId;
 		this.password = password;
 		this.socialType = socialType;
 		this.name = name;
@@ -85,4 +90,10 @@ public class Member extends BaseEntity {
 		this.countAttempt = countAttempt;
 		this.unbanDate = unbanDate;
 	}
+
+	public void updateInfo(String email, String name) {
+		this.email = email;
+		this.name = name;
+	}
+
 }

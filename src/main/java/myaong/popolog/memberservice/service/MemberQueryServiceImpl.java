@@ -82,4 +82,11 @@ public class MemberQueryServiceImpl implements MemberQueryService {
         }
         return findMember;
     }
+
+    @Override
+    public Member findByProviderId(String providerId) {
+        Member findMember = memberRepository.findByProviderId(providerId);
+
+        return findMember;
+    }
 }

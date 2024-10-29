@@ -11,8 +11,8 @@ import myaong.popolog.memberservice.dto.response.TokenDTO;
 import myaong.popolog.memberservice.entity.Member;
 import myaong.popolog.memberservice.entity.RefreshToken;
 import myaong.popolog.memberservice.jwt.TokenProvider;
-import myaong.popolog.memberservice.repository.MemberRepository;
 import myaong.popolog.memberservice.repository.RefreshTokenRedisRepository;
+import myaong.popolog.memberservice.service.MemberQueryService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -24,33 +24,30 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
+//@Component
 @RequiredArgsConstructor
 @Slf4j
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
-    private static final String REDIRECT_URI = "http://localhost:8083/login/kakao?accessToken=%s&refreshToken=%s";
-
+    private static final String REDIRECT_URI = "http://localhost:8083/auth/login/kakao?accessToken=%s&refreshToken=%s";
+    private final MemberQueryService memberQueryService;
     private final TokenProvider tokenProvider;
-    private final MemberRepository memberRepository;
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
 
     @Transactional
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
-        // KakaoMemberDetailsService에서 시큐리티 컨텍스트에 Authentication 객체를 저장한 덕분에 사용자 정보를 꺼낼 수 있음
-        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        KakaoUserInfo kakaoUserInfo = new KakaoUserInfo(oAuth2User.getAttributes());
+        // CustomOAuth2UserService에서 시큐리티 컨텍스트에 Authentication 객체를 저장한 덕분에 사용자 정보를 꺼낼 수 있음
+        CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
 
-        Member member = memberRepository.findByEmail(kakaoUserInfo.getEmail())
-                .orElseThrow(() -> new ApiException(ApiCode.MEMBER_NOT_FOUND));
+        Member findMember = memberQueryService.findByProviderId(customUserDetails.getProviderId());
 
-        TokenDTO tokenDTO = tokenProvider.createToken(member.getId(), member.getEmail(), member.getPermission().name());
+        TokenDTO tokenDTO = tokenProvider.createToken(findMember.getId(), findMember.getEmail(), findMember.getPermission().name());
 
-        saveRefreshTokenOnRedis(member, tokenDTO);
+        saveRefreshTokenOnRedis(findMember, tokenDTO.getRefreshToken());
 
-        log.info("memberId = {}", member.getId());
+        log.info("memberId = {}", findMember.getId());
         log.info("accessToken = {}", tokenDTO.getAccessToken());
         log.info("refreshToken = {}", tokenDTO.getRefreshToken());
 
@@ -58,15 +55,14 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         getRedirectStrategy().sendRedirect(request, response, redirectURI);
     }
 
-    private void saveRefreshTokenOnRedis(Member member, TokenDTO tokenDTO) {
+    private void saveRefreshTokenOnRedis(Member member, String refreshToken) {
         List<SimpleGrantedAuthority> simpleGrantedAuthorities = new ArrayList<>();
         simpleGrantedAuthorities.add(new SimpleGrantedAuthority(member.getPermission().name()));
 
         refreshTokenRedisRepository.save(RefreshToken.builder()
-                .id(member.getId())
-                .email(member.getEmail())
+                .id(member.getProviderId())
                 .authorities(simpleGrantedAuthorities)
-                .refreshToken(tokenDTO.getRefreshToken())
+                .refreshToken(refreshToken)
                 .build());
     }
 }

@@ -9,6 +9,7 @@ import myaong.popolog.memberservice.dto.response.MemberResponse;
 import myaong.popolog.memberservice.entity.Follow;
 import myaong.popolog.memberservice.entity.Member;
 import myaong.popolog.memberservice.repository.FollowRepository;
+import myaong.popolog.memberservice.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberCommandServiceImpl implements MemberCommandService {
     private final MemberQueryService memberQueryService;
     private final FollowRepository followRepository;
+    private final MemberRepository memberRepository;
 
     @Override
     public MemberResponse.FollowDTO followMember(Long memberId) {
@@ -46,5 +48,10 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     @Override
     public void editBasicInfo(MemberRequest.editBasicInfoDTO request) {
 
+    }
+
+    @Override
+    public Member saveMember(Member member) {
+        return memberRepository.save(member);
     }
 }

@@ -18,10 +18,10 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @RedisHash(value = "refresh", timeToLive = 604800)
 public class RefreshToken {
- 
-    private Long id;
-    private String email;
-    private Collection<? extends GrantedAuthority> authorities;
+
+    // key값을 providerId로 저장
+    private String id;
+    Collection<? extends GrantedAuthority> authorities;
  
     @Indexed
     private String refreshToken;
