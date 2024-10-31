@@ -21,6 +21,12 @@ public class JwtFilter extends OncePerRequestFilter {
     private static final String REFRESH_KEY_NAME = "refresh";
 
     private final JwtUtil jwtUtil;
+    private final RequestMatcherHolder requestMatcherHolder;
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        return requestMatcherHolder.getRequestMatchersByMinPermission(null).matches(request);
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {

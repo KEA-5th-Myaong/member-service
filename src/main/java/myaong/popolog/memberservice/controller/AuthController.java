@@ -27,15 +27,6 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final RedisService redisService;
 
-    // OAuth2SuccessHandler의 onAuthenticationSuccess에서 redirect되면 여기로 매핑됨
-    // 사용 X
-    @Operation(summary = "", description = "")
-    @GetMapping("/login/kakao")
-    public ApiResponse<TokenDTO> kakaoLogin(@RequestParam(name = "accessToken") String accessToken,
-                                            @RequestParam(name = "refreshToken") String refreshToken) {
-        return ApiResponse.onSuccess(TokenDTO.of(accessToken, refreshToken));
-    }
-
      // 액세스 토큰 재발급 API, JwtFilter의 redirectReissueURI 메서드에서 여기로 매핑됨
     @GetMapping("/reissue")
     public void reissueToken(HttpServletRequest request, HttpServletResponse response) {
@@ -48,6 +39,7 @@ public class AuthController {
         response.setStatus(HttpStatus.OK.value());
     }
 
+    @Operation(summary = "API 명세서 v0.3 line 15", description = "로그아웃(refresh token 삭제)")
     @PostMapping("/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();

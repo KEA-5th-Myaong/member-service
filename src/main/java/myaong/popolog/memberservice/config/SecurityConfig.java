@@ -1,6 +1,7 @@
 package myaong.popolog.memberservice.config;
 
 import lombok.RequiredArgsConstructor;
+import myaong.popolog.memberservice.enums.Permission;
 import myaong.popolog.memberservice.jwt.*;
 import myaong.popolog.memberservice.oauth2.OAuth2SuccessHandler;
 import myaong.popolog.memberservice.oauth2.service.CustomOAuth2UserService;
@@ -16,6 +17,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
+
+import static myaong.popolog.memberservice.enums.Permission.*;
 
 @Configuration
 @EnableWebSecurity
@@ -42,7 +45,14 @@ public class SecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers(AUTH_WHITELIST).permitAll()
+//                                .requestMatchers(AUTH_WHITELIST).permitAll()
+                                .requestMatchers(requestMatcherHolder.getRequestMatchersByMinPermission(null)).permitAll()
+                                .requestMatchers(requestMatcherHolder.getRequestMatchersByMinPermission(MEMBER))
+                                .hasAnyAuthority(MEMBER.name(), ADMIN.name(), SUPER.name())
+                                .requestMatchers(requestMatcherHolder.getRequestMatchersByMinPermission(ADMIN))
+                                .hasAnyAuthority(ADMIN.name(), SUPER.name())
+                                .requestMatchers(requestMatcherHolder.getRequestMatchersByMinPermission(SUPER))
+                                .hasAnyAuthority(SUPER.name())
                                 .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2

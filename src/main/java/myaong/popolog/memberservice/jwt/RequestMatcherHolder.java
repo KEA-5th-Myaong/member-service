@@ -18,14 +18,10 @@ import static org.springframework.http.HttpMethod.*;
 public class RequestMatcherHolder {
 
     private static final List<RequestInfo> REQUEST_INFO_LIST = List.of(
-        new RequestInfo(GET, "/**", null),
-        new RequestInfo(POST, "/**", null),
-        new RequestInfo(GET, "/", null),
-        new RequestInfo(POST, "/", null),
 
         // auth
-        new RequestInfo(POST, "/auth/**", null),
         new RequestInfo(GET, "/auth/**", null),
+        new RequestInfo(POST, "/auth/**", null),
         new RequestInfo(GET, "/login/**", null),
         new RequestInfo(POST, "/login/**", null),
         new RequestInfo(GET, "/webjars/**",null),
@@ -33,7 +29,9 @@ public class RequestMatcherHolder {
         // user
         new RequestInfo(GET, "/members/**", null),
 //        new RequestInfo(GET, "/members/v3/api-docs/", null),
-
+        new RequestInfo(GET, "/admin/**", Permission.ADMIN),
+        new RequestInfo(GET, "/super/**", Permission.SUPER),
+        new RequestInfo(GET, "/member/**", Permission.MEMBER),
         // static resources
         new RequestInfo(GET, "/docs/**", null),
         new RequestInfo(GET, "/*.ico", null),
@@ -47,30 +45,14 @@ public class RequestMatcherHolder {
      * @param minPermission 최소 권한 (Nullable)
      * @return 생성된 RequestMatcher
      */
-//    public RequestMatcher getRequestMatchersByMinPermission(@Nullable Permission minPermission) {
-//        var key = getKeyByRole(minPermission);
-//        return reqMatcherCacheMap.computeIfAbsent(key, k ->
-//            new OrRequestMatcher(REQUEST_INFO_LIST.stream()
-//                .filter(reqInfo -> Objects.equals(reqInfo.minPermission, minPermission))
-//                .map(reqInfo -> new AntPathRequestMatcher(reqInfo.pattern(),
-//                    reqInfo.method().name()))
-//                .toArray(AntPathRequestMatcher[]::new)));
-//    }
-
     public RequestMatcher getRequestMatchersByMinPermission(@Nullable Permission minPermission) {
         var key = getKeyByRole(minPermission);
-        return reqMatcherCacheMap.computeIfAbsent(key, k -> {
-            var matchers = REQUEST_INFO_LIST.stream()
-                    .filter(reqInfo -> Objects.equals(reqInfo.minPermission, minPermission))
-                    .map(reqInfo -> new AntPathRequestMatcher(reqInfo.pattern(), reqInfo.method().name()))
-                    .toArray(AntPathRequestMatcher[]::new);
-
-            if (matchers.length == 0) {
-                // 빈 경우 기본 요청 매처 반환 (예: 모든 요청 허용)
-                return new OrRequestMatcher(new AntPathRequestMatcher("/**"));
-            }
-            return new OrRequestMatcher(matchers);
-        });
+        return reqMatcherCacheMap.computeIfAbsent(key, k ->
+            new OrRequestMatcher(REQUEST_INFO_LIST.stream()
+                .filter(reqInfo -> Objects.equals(reqInfo.minPermission, minPermission))
+                .map(reqInfo -> new AntPathRequestMatcher(reqInfo.pattern(),
+                    reqInfo.method().name()))
+                .toArray(AntPathRequestMatcher[]::new)));
     }
 
     private String getKeyByRole(@Nullable Permission minPermission) {
@@ -80,5 +62,4 @@ public class RequestMatcherHolder {
     private record RequestInfo(HttpMethod method, String pattern, Permission minPermission) {
 
     }
-
 }
