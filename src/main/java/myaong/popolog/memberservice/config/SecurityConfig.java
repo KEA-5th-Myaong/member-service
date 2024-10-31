@@ -3,8 +3,6 @@ package myaong.popolog.memberservice.config;
 import lombok.RequiredArgsConstructor;
 import myaong.popolog.memberservice.jwt.*;
 import myaong.popolog.memberservice.oauth2.OAuth2SuccessHandlerV2;
-import myaong.popolog.memberservice.oauth2.service.CustomOAuth2UserService;
-import myaong.popolog.memberservice.oauth2.OAuth2SuccessHandler;
 import myaong.popolog.memberservice.oauth2.service.CustomOAuth2UserServiceV2;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,15 +22,12 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private static final String[] AUTH_WHITELIST = {
-            "/members/v3/api-docs", "/reissue", "/",
-            "/api/**", "/api/vote/**", "/health-check"
+            "/members/**", "/reissue", "/", "/auth/**", "/login",
+            "/api/**", "/api/vote/**", "/health-check", "/oauth2/**"
     };
 
-//    private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomOAuth2UserServiceV2 customOAuth2UserServiceV2;
-//    private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2SuccessHandlerV2 oAuth2SuccessHandlerV2;
-//    private final JwtFilter jwtFilter;
     private final JwtFilterV2 jwtFilterV2;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final JwtAuthenticationFailEntryPoint jwtAuthenticationFailEntryPoint;
@@ -52,7 +47,8 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserServiceV2))
-                        .successHandler(oAuth2SuccessHandlerV2))
+                        .successHandler(oAuth2SuccessHandlerV2)
+                )
                 .addFilterBefore(jwtFilterV2, UsernamePasswordAuthenticationFilter.class); // 기존 시큐리티의 UsernamePasswordAuthenticationFilter를 커스텀한 JwtFilter로 대체
 //                .exceptionHandling(exceptionHandling -> {
 //                    exceptionHandling.authenticationEntryPoint(jwtAuthenticationFailEntryPoint);

@@ -1,26 +1,36 @@
 package myaong.popolog.memberservice.oauth2;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import myaong.popolog.memberservice.entity.RefreshToken;
 import myaong.popolog.memberservice.jwt.JwtUtil;
+import myaong.popolog.memberservice.repository.RefreshTokenRedisRepository;
+import myaong.popolog.memberservice.service.RedisService;
+import myaong.popolog.memberservice.util.CookieUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class OAuth2SuccessHandlerV2 extends SimpleUrlAuthenticationSuccessHandler {
 	private final JwtUtil jwtUtil;
+    private final CookieUtil cookieUtil;
+    private final RefreshTokenRedisRepository refreshTokenRedisRepository;
+    private final RedisService redisService;
 //    private final RedisService redisService;
     
     @Override
@@ -34,34 +44,41 @@ public class OAuth2SuccessHandlerV2 extends SimpleUrlAuthenticationSuccessHandle
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
-        String role = auth.getAuthority();
+        String permission = auth.getAuthority();
         
         // accessToken과 refreshToken 생성
-        String accessToken = jwtUtil.createJwt("access", memberId, providerId, role, 60000L);
-        String refreshToken = jwtUtil.createJwt("refresh", memberId, providerId, role, 86400000L);
+        String accessToken = jwtUtil.createJwt("access", memberId, providerId, permission, 60000L);
+        // TODO: refresh 토큰에는 사용자 정보 안담아도 됨!
+        String refreshToken = jwtUtil.createJwt("refresh", memberId, providerId, permission, 86400000L);
 
         // redis에 insert (key = providerId / value = refreshToken)
 //        redisService.setValues(providerId, refreshToken, Duration.ofMills(86400000L));
-        
+        saveRefreshTokenOnRedis(providerId, refreshToken, permission);
+
+
         // 응답
         response.setHeader("access", "Bearer " + accessToken);
-        response.addCookie(createCookie("refresh", refreshToken));
+        response.addCookie(cookieUtil.createCookie("access", refreshToken));
         response.setStatus(HttpStatus.OK.value());
 
         log.info("accessToken: {}", accessToken);
         log.info("refreshToken: {}", refreshToken);
 
-        response.sendRedirect("http://localhost:8083/");     // 로그인 성공시 프론트에 알려줄 redirect 경로
+        response.sendRedirect("http://localhost:9083/");     // 로그인 성공시 프론트에 알려줄 redirect 경로
     }
-    
-    private Cookie createCookie(String key, String value) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24*60*60);     // 쿠키가 살아있을 시간
-        /*cookie.setSecure();*/         // https에서만 동작할것인지 (로컬은 http 환경이라 안먹음)
-        /*cookie.setPath("/");*/        // 쿠키가 전역에서 동작
-        cookie.setHttpOnly(true);       // http에서만 쿠키가 동작할 수 있도록 (js와 같은곳에서 가져갈 수 없도록)
 
-        return cookie;
+
+    private void saveRefreshTokenOnRedis(String providerId, String refreshToken, String permission) {
+        List<SimpleGrantedAuthority> simpleGrantedAuthorities = new ArrayList<>();
+        simpleGrantedAuthorities.add(new SimpleGrantedAuthority(permission));
+
+        refreshTokenRedisRepository.save(RefreshToken.builder()
+                .id(providerId)
+                .authorities(simpleGrantedAuthorities)
+                .refreshToken(refreshToken)
+                .build());
+
+//        redisService.setValues(providerId, refreshToken, Duration.ofDays(86400000L));
     }
     
 }
