@@ -16,7 +16,7 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class JwtFilterV2 extends OncePerRequestFilter {
+public class JwtFilter extends OncePerRequestFilter {
     private static final String ACCESS_KEY_NAME = "access";
     private static final String REFRESH_KEY_NAME = "refresh";
 

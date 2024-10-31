@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import myaong.popolog.memberservice.converter.AuthConverter;
 import myaong.popolog.memberservice.entity.Member;
-import myaong.popolog.memberservice.enums.Permission;
-import myaong.popolog.memberservice.enums.SocialType;
 import myaong.popolog.memberservice.oauth2.CustomOAuth2User;
 import myaong.popolog.memberservice.oauth2.dto.GoogleResponse;
 import myaong.popolog.memberservice.oauth2.dto.KakaoResponse;
@@ -24,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class CustomOAuth2UserServiceV2 extends DefaultOAuth2UserService {
+public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final MemberQueryService memberQueryService;
     private final MemberCommandService memberCommandService;
 

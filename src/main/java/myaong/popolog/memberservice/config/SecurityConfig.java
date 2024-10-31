@@ -2,8 +2,8 @@ package myaong.popolog.memberservice.config;
 
 import lombok.RequiredArgsConstructor;
 import myaong.popolog.memberservice.jwt.*;
-import myaong.popolog.memberservice.oauth2.OAuth2SuccessHandlerV2;
-import myaong.popolog.memberservice.oauth2.service.CustomOAuth2UserServiceV2;
+import myaong.popolog.memberservice.oauth2.OAuth2SuccessHandler;
+import myaong.popolog.memberservice.oauth2.service.CustomOAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -26,9 +26,9 @@ public class SecurityConfig {
             "/api/**", "/api/vote/**", "/health-check", "/oauth2/**"
     };
 
-    private final CustomOAuth2UserServiceV2 customOAuth2UserServiceV2;
-    private final OAuth2SuccessHandlerV2 oAuth2SuccessHandlerV2;
-    private final JwtFilterV2 jwtFilterV2;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final JwtFilter jwtFilter;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final JwtAuthenticationFailEntryPoint jwtAuthenticationFailEntryPoint;
     private final RequestMatcherHolder requestMatcherHolder;
@@ -46,10 +46,10 @@ public class SecurityConfig {
                                 .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserServiceV2))
-                        .successHandler(oAuth2SuccessHandlerV2)
+                        .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .successHandler(oAuth2SuccessHandler)
                 )
-                .addFilterBefore(jwtFilterV2, UsernamePasswordAuthenticationFilter.class); // 기존 시큐리티의 UsernamePasswordAuthenticationFilter를 커스텀한 JwtFilter로 대체
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // 기존 시큐리티의 UsernamePasswordAuthenticationFilter를 커스텀한 JwtFilter로 대체
 //                .exceptionHandling(exceptionHandling -> {
 //                    exceptionHandling.authenticationEntryPoint(jwtAuthenticationFailEntryPoint);
 //                    exceptionHandling.accessDeniedHandler(jwtAccessDeniedHandler);
