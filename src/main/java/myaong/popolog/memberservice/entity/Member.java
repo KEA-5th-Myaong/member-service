@@ -96,4 +96,11 @@ public class Member extends BaseEntity {
 		this.name = name;
 	}
 
+	public void initiateCountAttempt() {
+		this.countAttempt = 0;
+	}
+
+	public void incrementCountAttempt() {
+        this.countAttempt++;
+    }
 }

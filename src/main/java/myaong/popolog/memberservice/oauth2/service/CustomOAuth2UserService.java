@@ -38,7 +38,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
-        Member member = null;
         OAuth2Response oAuth2Response = null;
 
         if (registrationId.equals("kakao")) {

@@ -29,8 +29,9 @@ import java.util.Date;
 @Component
 @Slf4j
 public class JwtUtil {
-    private static final long ACCESS_EXPIRATION_MS = 60000L;
-    private static final long REFRESH_EXPIRATION_MS = 86400000L;
+    private static final long ACCESS_EXPIRATION_MS = 60 * 10 * 1 * 1000L;
+    private static final long REFRESH_EXPIRATION_MS = 60 * 60 * 24 * 1 * 1000L;
+    private static final String REISSUE_REDIRECT_URI = "/auth/reissue";
 
     private SecretKey secretKey;
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
@@ -145,7 +146,7 @@ public class JwtUtil {
         HttpSession session = request.getSession();
         session.setAttribute("access", tokenDto.getAccessToken());
         session.setAttribute("refresh", tokenDto.getRefreshToken());
-        response.sendRedirect("/auth/reissue");
+        response.sendRedirect(REISSUE_REDIRECT_URI);
     }
 
     // access, refresh 토큰 동시에 재발급
@@ -157,11 +158,11 @@ public class JwtUtil {
         Long memberId = getMemberId(findRefreshToken.getRefreshToken());
 
         TokenDTO tokenDto = createAccessAndRefreshToken(memberId, providerId, findRefreshToken.getAuthority());
-        refreshTokenRedisRepository.save(RefreshToken.builder()
-                .id(findRefreshToken.getId())
-                .authorities(findRefreshToken.getAuthorities())
-                .refreshToken(tokenDto.getRefreshToken())
-                .build());
+//        refreshTokenRedisRepository.save(RefreshToken.builder()
+//                .id(findRefreshToken.getId())
+//                .authorities(findRefreshToken.getAuthorities())
+//                .refreshToken(tokenDto.getRefreshToken())
+//                .build());
 
         // redis에 있는 refresh token 새로운 refresh token으로 대체
         // update refreshToken to Redis

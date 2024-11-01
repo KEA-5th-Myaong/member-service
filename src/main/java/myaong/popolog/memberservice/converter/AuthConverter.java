@@ -33,7 +33,7 @@ public class AuthConverter {
                         .nickname(oAuth2Response.getName())
                         .email(oAuth2Response.getEmail())
                         .permission(Permission.MEMBER)
-                        .countAttempt(1)
+                        .countAttempt(0)
                         .unbanDate(LocalDate.now())
                         .build();
     }
