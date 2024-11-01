@@ -17,7 +17,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtFilter extends OncePerRequestFilter {
-    private static final String ACCESS_KEY_NAME = "access";
+    private static final String AUTHORIZATION_HEADER_NAME = "Authorization";
     private static final String REFRESH_KEY_NAME = "refresh";
 
     private final JwtUtil jwtUtil;
@@ -25,18 +25,14 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
+        log.info("Request URI = {}", request.getRequestURI());
         return requestMatcherHolder.getRequestMatchersByMinPermission(null).matches(request);
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // 요청 헤더에 있는 access라는 값을 가져오자 이게 accessToken이다.
-        String accessToken = jwtUtil.getTokenFromHeader(request, ACCESS_KEY_NAME);
-        // 요청헤더에 access가 없는 경우
-        if(accessToken  == null) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        String accessToken = jwtUtil.getTokenFromHeader(request, AUTHORIZATION_HEADER_NAME);
 
         // 유효한 토큰(유효성 검사 통과, 만료되지 않은 토큰)이면 SecurityContext에 인증 정보 저장
         if (jwtUtil.validateToken(accessToken) && !jwtUtil.isExpired(accessToken)) {

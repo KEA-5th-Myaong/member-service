@@ -18,17 +18,21 @@ import static org.springframework.http.HttpMethod.*;
 public class RequestMatcherHolder {
 
     private static final List<RequestInfo> REQUEST_INFO_LIST = List.of(
+        // main
+        new RequestInfo(GET, "/", null),
 
         // auth
         new RequestInfo(GET, "/auth/**", null),
         new RequestInfo(POST, "/auth/**", null),
+        new RequestInfo(GET, "/oauth2/**", null),
+        new RequestInfo(POST, "/oauth2/**", null),
+
         new RequestInfo(GET, "/login/**", null),
         new RequestInfo(POST, "/login/**", null),
         new RequestInfo(GET, "/webjars/**",null),
 
         // user
         new RequestInfo(GET, "/members/**", null),
-//        new RequestInfo(GET, "/members/v3/api-docs/", null),
         new RequestInfo(GET, "/admin/**", Permission.ADMIN),
         new RequestInfo(GET, "/super/**", Permission.SUPER),
         new RequestInfo(GET, "/member/**", Permission.MEMBER),
