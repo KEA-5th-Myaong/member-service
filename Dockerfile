@@ -1,3 +1,3 @@
 FROM openjdk:17
-COPY build/libs/popolog-member-service.jar popolog-member-service.jar
-ENTRYPOINT ["java", "-jar", "/popolog-member-service.jar"]
+COPY build/libs/pplog-member-service.jar pplog-member-service.jar
+ENTRYPOINT ["java", "-jar", "/pplog-member-service.jar"]

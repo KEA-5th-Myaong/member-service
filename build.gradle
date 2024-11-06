@@ -24,8 +24,8 @@ repositories {
 }
 
 bootJar{
-	archivesBaseName = 'popolog-member-service'
-	archiveFileName = 'popolog-member-service.jar'
+	archivesBaseName = 'pplog-member-service'
+	archiveFileName = 'pplog-member-service.jar'
 	archiveVersion = "0.0.0"
 }
 
