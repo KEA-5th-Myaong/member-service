@@ -28,9 +28,9 @@ pipeline {
         stage('Clonning Repository') {
             steps {
                 echo 'Clonning Repository'
-                git url: 'git@github.com:KEA-5th-Myaong/member-service.git',
+                git url: 'https://github.com/KEA-5th-Myaong/member-service.git',
                     branch: 'develop',
-                    credentialsId: 'github-ssh'
+                    credentialsId: 'github-token'
             }
             post {
                 success {
