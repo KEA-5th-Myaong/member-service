@@ -146,7 +146,6 @@ pipeline {
                 echo 'Deploying to Kubernetes'
                 sshagent (credentials: ['kube-master-ssh']) {
                     sh """
-                    scp -o StrictHostKeyChecking=no ${memberManifest} ${kubeMasterNodeServerUsername}@${kubeMasterNodeServerIp}:~/app
                     ssh -o StrictHostKeyChecking=no ${kubeMasterNodeServerUsername}@${kubeMasterNodeServerIp} 'kubectl apply -f ~/app/${memberManifest}'
                     """
                 }
