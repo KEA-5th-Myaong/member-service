@@ -26,7 +26,8 @@ import static myaong.popolog.memberservice.enums.Permission.*;
 public class SecurityConfig {
     private static final String[] AUTH_WHITELIST = {
             "/members/**", "/reissue", "/", "/auth/**", "/login",
-            "/api/**", "/api/vote/**", "/health-check", "/oauth2/**"
+            "/api/**", "/api/vote/**", "/health-check", "/oauth2/**",
+            "/actuator/**" // Actuator 엔드포인트 허용
     };
 
     private final CustomOAuth2UserService customOAuth2UserService;
@@ -45,25 +46,21 @@ public class SecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-//                                .requestMatchers(AUTH_WHITELIST).permitAll()
-                                .requestMatchers(requestMatcherHolder.getRequestMatchersByMinPermission(null)).permitAll()
-                                .requestMatchers(requestMatcherHolder.getRequestMatchersByMinPermission(MEMBER))
-                                .hasAnyAuthority(MEMBER.name(), ADMIN.name(), SUPER.name())
-                                .requestMatchers(requestMatcherHolder.getRequestMatchersByMinPermission(ADMIN))
-                                .hasAnyAuthority(ADMIN.name(), SUPER.name())
-                                .requestMatchers(requestMatcherHolder.getRequestMatchersByMinPermission(SUPER))
-                                .hasAnyAuthority(SUPER.name())
-                                .anyRequest().authenticated()
+                        .requestMatchers(AUTH_WHITELIST).permitAll() // AUTH_WHITELIST에 있는 경로는 모두 허용
+                        .requestMatchers("/eureka/**", "/actuator/**").permitAll() // Actuator와 Eureka 엔드포인트 허용
+                        .requestMatchers(requestMatcherHolder.getRequestMatchersByMinPermission(MEMBER))
+                        .hasAnyAuthority(MEMBER.name(), ADMIN.name(), SUPER.name())
+                        .requestMatchers(requestMatcherHolder.getRequestMatchersByMinPermission(ADMIN))
+                        .hasAnyAuthority(ADMIN.name(), SUPER.name())
+                        .requestMatchers(requestMatcherHolder.getRequestMatchersByMinPermission(SUPER))
+                        .hasAnyAuthority(SUPER.name())
+                        .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler(oAuth2SuccessHandler)
                 )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // 기존 시큐리티의 UsernamePasswordAuthenticationFilter를 커스텀한 JwtFilter로 대체
-//                .exceptionHandling(exceptionHandling -> {
-//                    exceptionHandling.authenticationEntryPoint(jwtAuthenticationFailEntryPoint);
-//                    exceptionHandling.accessDeniedHandler(jwtAccessDeniedHandler);
-//                });
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // JwtFilter 추가
 
         return http.build();
     }
