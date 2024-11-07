@@ -4,7 +4,7 @@ pipeline {
     environment {
         registryCredential = 'docker-hub' // Docker Hub에 로그인할 때 사용할 자격 증명 ID
         dockerImage = '' // Docker 이미지 변수 초기화
-        memberManifest = '' // YAML 파일 변수 초기화
+        memberManifest = 'member-service.yaml' // YAML 파일 변수 하드 코딩
     }
 
     stages {
@@ -14,15 +14,14 @@ pipeline {
                     withCredentials([string(credentialsId: 'docker-hub-username', variable: 'DOCKER_HUB_USERNAME'),
                                      string(credentialsId: 'member-image-name', variable: 'MEMBER_IMAGE_NAME'),
                                      string(credentialsId: 'kube-master-username', variable: 'KUBE_MASTER_USERNAME'),
-                                     string(credentialsId: 'kube-master-ip', variable: 'KUBE_MASTER_IP'),
-                                     file(credentialsId: 'member-service-yaml', variable: 'MANIFEST')]) { // YAML 파일 가져오기
+                                     string(credentialsId: 'kube-master-ip', variable: 'KUBE_MASTER_IP')]) { // YAML 파일 가져오기 제외
                         // 환경 변수 설정
                         env.dockerHubUsername = DOCKER_HUB_USERNAME
                         env.memberImageName = MEMBER_IMAGE_NAME
                         env.kubeMasterNodeServerUsername = KUBE_MASTER_USERNAME
                         env.kubeMasterNodeServerIp = KUBE_MASTER_IP
                         env.fullImageName = "${env.dockerHubUsername}/${env.memberImageName}" // fullImageName 설정
-                        env.memberManifest = MANIFEST // memberManifest 파일 경로 설정
+                        // memberManifest는 하드 코딩으로 설정되어 있으므로 여기서 설정할 필요 없음
                     }
                 }
             }
