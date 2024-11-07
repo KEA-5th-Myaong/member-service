@@ -4,7 +4,7 @@ pipeline {
     environment {
         registryCredential = 'docker-hub' // Docker Hub에 로그인할 때 사용할 자격 증명 ID
         dockerImage = '' // Docker 이미지 변수 초기화
-        manifest = '' // YAML 파일 변수 초기화
+        memberManifest = '' // YAML 파일 변수 초기화
     }
 
     stages {
@@ -22,7 +22,7 @@ pipeline {
                         env.kubeMasterNodeServerUsername = KUBE_MASTER_USERNAME
                         env.kubeMasterNodeServerIp = KUBE_MASTER_IP
                         env.fullImageName = "${env.dockerHubUsername}/${env.memberImageName}" // fullImageName 설정
-                        env.manifest = MANIFEST // manifest 파일 경로 설정
+                        env.memberManifest = MANIFEST // memberManifest 파일 경로 설정
                     }
                 }
             }
@@ -147,8 +147,8 @@ pipeline {
                 echo 'Deploying to Kubernetes'
                 sshagent (credentials: ['kube-master-ssh']) {
                     sh """
-                    scp -o StrictHostKeyChecking=no ${manifest} ${kubeMasterNodeServerUsername}@${kubeMasterNodeServerIp}:~/app
-                    ssh -o StrictHostKeyChecking=no ${kubeMasterNodeServerUsername}@${kubeMasterNodeServerIp} 'kubectl apply -f ~/app/${manifest}'
+                    scp -o StrictHostKeyChecking=no ${memberManifest} ${kubeMasterNodeServerUsername}@${kubeMasterNodeServerIp}:~/app
+                    ssh -o StrictHostKeyChecking=no ${kubeMasterNodeServerUsername}@${kubeMasterNodeServerIp} 'kubectl apply -f ~/app/${memberManifest}'
                     """
                 }
             }
