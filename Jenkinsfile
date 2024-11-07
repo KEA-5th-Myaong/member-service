@@ -109,7 +109,7 @@ pipeline {
                 echo 'Stopping Previous Container'
                 sshagent (credentials: ['kube-master-ssh']) {
                     sh """
-                    ssh -o StrictHostKeyChecking=no ${kubeMasterNodeServerUsername}@${kubeMasterNodeServerIp} 'sudo docker ps -q --filter name=${env.memberImageName} | xargs -r docker stop || true'
+                    ssh -o StrictHostKeyChecking=no ${kubeMasterNodeServerUsername}@${kubeMasterNodeServerIp} 'docker ps -q --filter name=${env.memberImageName} | xargs -r docker stop || true'
                     """
                 }
             }
@@ -122,7 +122,7 @@ pipeline {
                     def previousBuildId = "${env.BUILD_ID.toInteger() - 1}"
                     sshagent (credentials: ['kube-master-ssh']) {
                         sh """
-                        ssh -o StrictHostKeyChecking=no ${kubeMasterNodeServerUsername}@${kubeMasterNodeServerIp} 'sudo docker rmi ${env.fullImageName}:${previousBuildId} || true'
+                        ssh -o StrictHostKeyChecking=no ${kubeMasterNodeServerUsername}@${kubeMasterNodeServerIp} 'docker rmi ${env.fullImageName}:${previousBuildId} || true'
                         """
                     }
                 }
@@ -146,7 +146,7 @@ pipeline {
                 echo 'Deploying to Kubernetes'
                 sshagent (credentials: ['kube-master-ssh']) {
                     sh """
-                    ssh -o StrictHostKeyChecking=no ${kubeMasterNodeServerUsername}@${kubeMasterNodeServerIp} 'sudo kubectl apply -f ~/app/${memberManifest}'
+                    ssh -o StrictHostKeyChecking=no ${kubeMasterNodeServerUsername}@${kubeMasterNodeServerIp} 'kubectl apply -f ~/app/${memberManifest}'
                     """
                 }
             }
