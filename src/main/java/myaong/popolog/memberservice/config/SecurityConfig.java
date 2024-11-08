@@ -26,7 +26,7 @@ import static myaong.popolog.memberservice.enums.Permission.*;
 public class SecurityConfig {
     private static final String[] AUTH_WHITELIST = {
             "/members/**", "/reissue", "/", "/auth/**", "/login",
-            "/api/**", "/api/vote/**", "/health-check", "/oauth2/**"
+            "/api/**", "/api/vote/**", "/health-check", "/oauth2/**","/actuator/**"
     };
 
     private final CustomOAuth2UserService customOAuth2UserService;
