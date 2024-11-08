@@ -26,8 +26,7 @@ import static myaong.popolog.memberservice.enums.Permission.*;
 public class SecurityConfig {
     private static final String[] AUTH_WHITELIST = {
             "/members/**", "/reissue", "/", "/auth/**", "/login",
-            "/api/**", "/api/vote/**", "/health-check", "/oauth2/**",
-            "/actuator/**" // Actuator 엔드포인트 허용
+            "/api/**", "/api/vote/**", "/health-check", "/oauth2/**"
     };
 
     private final CustomOAuth2UserService customOAuth2UserService;
@@ -47,7 +46,6 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(AUTH_WHITELIST).permitAll() // AUTH_WHITELIST에 있는 경로는 모두 허용
-                        .requestMatchers("/eureka/**", "/actuator/**").permitAll() // Actuator와 Eureka 엔드포인트 허용
                         .requestMatchers(requestMatcherHolder.getRequestMatchersByMinPermission(MEMBER))
                         .hasAnyAuthority(MEMBER.name(), ADMIN.name(), SUPER.name())
                         .requestMatchers(requestMatcherHolder.getRequestMatchersByMinPermission(ADMIN))

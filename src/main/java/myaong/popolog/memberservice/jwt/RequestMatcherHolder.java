@@ -31,6 +31,10 @@ public class RequestMatcherHolder {
         new RequestInfo(POST, "/login/**", null),
         new RequestInfo(GET, "/webjars/**",null),
 
+        // config
+        new RequestInfo(POST, "/actuator/**", null),
+        new RequestInfo(GET, "/actuator/**", null),
+
         // user
         new RequestInfo(GET, "/members/**", null),
         new RequestInfo(GET, "/admin/**", Permission.ADMIN),
@@ -41,6 +45,8 @@ public class RequestMatcherHolder {
         new RequestInfo(GET, "/*.ico", null),
         new RequestInfo(GET, "/resources/**", null),
         new RequestInfo(GET, "/error", null)
+
+
     );
     private final ConcurrentHashMap<String, RequestMatcher> reqMatcherCacheMap = new ConcurrentHashMap<>();
 
