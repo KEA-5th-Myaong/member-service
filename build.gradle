@@ -39,7 +39,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0' // SQL 쿼리 파라미터 값 로그로 보여주는 라이브러리
 
     // swagger
@@ -52,6 +51,18 @@ dependencies {
 
     // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // local 프로필에서 사용할 의존성
+    if (project.hasProperty('local')) {
+        implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    }
+
+    // dev 프로필에서 사용할 의존성
+    if (project.hasProperty('dev')) {
+        implementation 'org.springframework.cloud:spring-cloud-starter-kubernetes-client'
+        implementation 'org.springframework.cloud:spring-cloud-starter-kubernetes-client-config'
+        implementation 'org.springframework.cloud:spring-cloud-starter-kubernetes-client-loadbalancer'
+    }
 
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
