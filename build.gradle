@@ -52,17 +52,13 @@ dependencies {
     // redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
-    // local 프로필에서 사용할 의존성
-    if (project.hasProperty('local')) {
-        implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
-    }
+    // eureka client
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
-    // dev 프로필에서 사용할 의존성
-    if (project.hasProperty('dev')) {
-        implementation 'org.springframework.cloud:spring-cloud-starter-kubernetes-client'
-        implementation 'org.springframework.cloud:spring-cloud-starter-kubernetes-client-config'
-        implementation 'org.springframework.cloud:spring-cloud-starter-kubernetes-client-loadbalancer'
-    }
+    // spring cloud kubernetes
+    implementation 'org.springframework.cloud:spring-cloud-starter-kubernetes-client'
+    implementation 'org.springframework.cloud:spring-cloud-starter-kubernetes-client-config'
+    implementation 'org.springframework.cloud:spring-cloud-starter-kubernetes-client-loadbalancer'
 
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

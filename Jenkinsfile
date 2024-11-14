@@ -4,7 +4,6 @@ pipeline {
     environment {
         registryCredential = 'docker-hub' // Docker Hub에 로그인할 때 사용할 자격 증명 ID
         dockerImage = '' // Docker 이미지 변수 초기화
-        memberManifest = 'member-service.yaml' // YAML 파일 변수 하드 코딩
     }
 
     stages {
@@ -21,7 +20,6 @@ pipeline {
                         env.kubeMasterNodeServerUsername = KUBE_MASTER_USERNAME
                         env.kubeMasterNodeServerIp = KUBE_MASTER_IP
                         env.fullImageName = "${env.dockerHubUsername}/${env.memberImageName}" // fullImageName 설정
-                        // memberManifest는 하드 코딩으로 설정되어 있으므로 여기서 설정할 필요 없음
                     }
                 }
             }
@@ -34,29 +32,6 @@ pipeline {
                     branch: 'develop',
                     credentialsId: 'github-token'
             }
-            post {
-                success {
-                    echo 'Successfully Cloned Repository'
-                }
-                failure {
-                    error 'This pipeline stops here...'
-                }
-            }
-        }
-
-        stage('Secret File Download') {
-            steps {
-                withCredentials([file(credentialsId: 'member-application.yml', variable: 'application')]) {
-                    dir('.') {
-                        script {
-                            if (!fileExists("src/main/resources/")) {
-                                sh "mkdir -p src/main/resources/"
-                            }
-                            sh "cp \$application src/main/resources/"
-                        }
-                    }
-                }
-            }
         }
 
         stage('Build Gradle') {
@@ -65,11 +40,6 @@ pipeline {
                 dir('.') {
                     sh 'chmod +x ./gradlew'
                     sh './gradlew clean build -x test'
-                }
-            }
-            post {
-                failure {
-                    error 'Fail Building with Gradle'
                 }
             }
         }
@@ -81,11 +51,6 @@ pipeline {
                     dockerImage = docker.build("${env.fullImageName}:${env.BUILD_ID}")
                 }
             }
-            post {
-                failure {
-                    error 'This pipeline stops here...'
-                }
-            }
         }
 
         stage('Push Docker') {
@@ -95,22 +60,6 @@ pipeline {
                     docker.withRegistry('', registryCredential) {
                         dockerImage.push()
                     }
-                }
-            }
-            post {
-                failure {
-                    error 'This pipeline stops here...'
-                }
-            }
-        }
-
-        stage('Container Stop') {
-            steps {
-                echo 'Stopping Previous Container'
-                sshagent (credentials: ['kube-master-ssh']) {
-                    sh """
-                    ssh -o StrictHostKeyChecking=no ${kubeMasterNodeServerUsername}@${kubeMasterNodeServerIp} 'docker ps -q --filter name=${env.memberImageName} | xargs -r docker stop || true'
-                    """
                 }
             }
         }
@@ -146,7 +95,14 @@ pipeline {
                 echo 'Deploying to Kubernetes'
                 sshagent (credentials: ['kube-master-ssh']) {
                     sh """
-                    ssh -o StrictHostKeyChecking=no ${kubeMasterNodeServerUsername}@${kubeMasterNodeServerIp} 'kubectl apply -f ~/app/${memberManifest}'
+                    ssh -o StrictHostKeyChecking=no ${kubeMasterNodeServerUsername}@${kubeMasterNodeServerIp} '
+                        # Change directory to where the manifests are located
+                        cd ~/gitops/apps/ &&
+
+                        # Apply the ConfigMap and Deployment YAML files
+                        kubectl apply -f member-configmap.yaml &&
+                        kubectl apply -f member-service.yaml
+                    '
                     """
                 }
             }
@@ -155,10 +111,12 @@ pipeline {
 
     post {
         success {
-            slackSend (channel: '#jenkins', color: '#00FF00', message: "SUCCESSFUL: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+            slackSend(channel: '#jenkins', color: '#00FF00', message: """:white_check_mark: 성공 : ${env.JOB_NAME} [${env.BUILD_NUMBER}] 확인 : (${env.BUILD_URL})""")
         }
+
+
         failure {
-            slackSend (channel: '#jenkins', color: '#FF0000', message: "FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]' (${env.BUILD_URL})")
+            slackSend(channel: '#jenkins', color: '#00FF00', message: """:octagonal_sign: 실패 : ${env.JOB_NAME} [${env.BUILD_NUMBER}] 확인 : (${env.BUILD_URL})""")
         }
     }
 }
