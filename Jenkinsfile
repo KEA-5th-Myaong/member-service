@@ -97,7 +97,7 @@ pipeline {
                     sh """
                     ssh -o StrictHostKeyChecking=no ${kubeMasterNodeServerUsername}@${kubeMasterNodeServerIp} '
                         # Change directory to where the manifests are located
-                        cd ~/gitops/apps/ &&
+                        cd ~/gitops/apps/member/ &&
 
                         # Apply the ConfigMap and Deployment YAML files
                         kubectl apply -f member-configmap.yaml &&
