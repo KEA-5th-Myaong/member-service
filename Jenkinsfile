@@ -44,19 +44,30 @@ pipeline {
             }
         }
 
-        stage('Build Docker') {
+        stage('Build & Push Docker Image') {
             steps {
-                echo 'Building Docker Image'
+                echo 'Building and Pushing Docker Image'
                 script {
-                    dockerImage = docker.build("${env.fullImageName}:${env.BUILD_ID}")
-                }
-            }
-        }
+                    def previousBuildId = "${env.BUILD_ID.toInteger() - 1}"
 
-        stage('Push Docker') {
-            steps {
-                echo 'Pushing Docker Image'
-                script {
+                    // 1. 로컬에 존재하는 latest 태그가 붙은 도커 이미지의 태그를 previousBuildId로 변경
+                    sh """
+                    docker tag ${env.fullImageName}:latest ${env.fullImageName}:${previousBuildId} || true
+                    """
+
+                    docker.withRegistry('', registryCredential) {
+                        // 2. 원격 도커 허브에서 latest 태그의 이미지 삭제
+                        sh "docker rmi ${env.fullImageName}:latest || true"
+
+                        // 3. 1번에서 태그가 previousBuildId로 변경된 도커 이미지를 원격 도커 허브에 푸시
+                        sh "docker push ${env.fullImageName}:${previousBuildId} || true"
+                    }
+
+                    // 4. 로컬에서 previousBuildId 태그에 해당하는 이미지 삭제
+                    sh "docker rmi ${env.fullImageName}:${previousBuildId} || true"
+
+                    // 5. 새로 생성되는 도커 이미지의 태그를 latest로 설정하고 푸시
+                    dockerImage = docker.build("${env.fullImageName}:latest")
                     docker.withRegistry('', registryCredential) {
                         dockerImage.push()
                     }
@@ -64,32 +75,7 @@ pipeline {
             }
         }
 
-        stage('Image Delete on Kubernetes') {
-            steps {
-                echo 'Removing Previous Docker Image on Kubernetes'
-                script {
-                    def previousBuildId = "${env.BUILD_ID.toInteger() - 1}"
-                    sshagent (credentials: ['kube-master-ssh']) {
-                        sh """
-                        ssh -o StrictHostKeyChecking=no ${kubeMasterNodeServerUsername}@${kubeMasterNodeServerIp} 'docker rmi ${env.fullImageName}:${previousBuildId} || true'
-                        """
-                    }
-                }
-            }
-        }
-
-        stage('Image Delete on Jenkins VM') {
-            steps {
-                echo 'Removing Previous Docker Image on Jenkins VM'
-                script {
-                    def previousBuildId = "${env.BUILD_ID.toInteger() - 1}"
-                    sh """
-                    docker rmi ${env.fullImageName}:${previousBuildId} || true
-                    """
-                }
-            }
-        }
-
+        // 여기서 member-service.yaml의 이미지 태그를 설정해줘야함
         stage('Deploy to Kubernetes') {
             steps {
                 echo 'Deploying to Kubernetes'
