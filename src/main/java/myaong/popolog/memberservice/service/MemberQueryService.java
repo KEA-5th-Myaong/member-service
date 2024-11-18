@@ -5,7 +5,7 @@ import myaong.popolog.memberservice.entity.Member;
 
 public interface MemberQueryService {
 
-    MemberResponse.BasicInfoDTO getMemberBasicInfo();
+    MemberResponse.BasicInfoDTO getMemberBasicInfo(Long memberId);
     MemberResponse.PartialInfoDTO getMemberPartialInfoByMemberId(Long memberId);
     MemberResponse.PartialInfoDTO getMemberPartialInfoByUsername(String username);
     MemberResponse.BlogInfoDTO getMemberBlogInfo(Long memberId);

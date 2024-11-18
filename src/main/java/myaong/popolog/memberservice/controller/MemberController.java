@@ -21,8 +21,9 @@ public class MemberController {
 
     @Operation(summary = "API 명세서 v0.3 line 15", description = "현재 로그인한 회원의 정보 조회")
     @GetMapping("/me")
-    public ApiResponse<MemberResponse.BasicInfoDTO> getMemberBasicInfo() {
-        return ApiResponse.onSuccess(memberQueryService.getMemberBasicInfo());
+    public ApiResponse<MemberResponse.BasicInfoDTO> getMemberBasicInfo(@RequestHeader("memberId") String memberId) {
+        Long convertedMemberId = Long.valueOf(memberId);
+        return ApiResponse.onSuccess(memberQueryService.getMemberBasicInfo(convertedMemberId));
     }
 
     @Operation(summary = "API 명세서 v0.3 line 16", description = "memberId로 회원 정보 조회")

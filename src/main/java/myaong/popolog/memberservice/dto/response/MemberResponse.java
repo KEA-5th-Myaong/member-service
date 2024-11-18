@@ -22,7 +22,6 @@ public class MemberResponse {
         private String nickname;
         private String email;
         private String profilePicUrl;
-        private Permission permission;
     }
 
     @Builder

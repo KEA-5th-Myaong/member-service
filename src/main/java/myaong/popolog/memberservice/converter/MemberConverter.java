@@ -18,7 +18,6 @@ public class MemberConverter {
                 .nickname(member.getNickname())
                 .email(member.getEmail())
                 .profilePicUrl(member.getProfilePicUrl())
-                .permission(member.getPermission())
                 .build();
     }
 

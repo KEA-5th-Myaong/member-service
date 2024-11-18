@@ -21,8 +21,8 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     private final MemberRepository memberRepository;
 
     @Override
-    public MemberResponse.BasicInfoDTO getMemberBasicInfo() {
-        Member findMember = findMemberByMemberId(5L);
+    public MemberResponse.BasicInfoDTO getMemberBasicInfo(Long memberId) {
+        Member findMember = findMemberByMemberId(memberId);
         return MemberConverter.toBasicInfoDTO(findMember);
     }
 
