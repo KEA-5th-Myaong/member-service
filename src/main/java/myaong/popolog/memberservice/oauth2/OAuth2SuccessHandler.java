@@ -11,6 +11,7 @@ import myaong.popolog.memberservice.repository.RefreshTokenRedisRepository;
 import myaong.popolog.memberservice.service.MemberQueryService;
 import myaong.popolog.memberservice.service.RedisService;
 import myaong.popolog.memberservice.util.CookieUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -41,6 +42,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final RedisService redisService;
     private final MemberQueryService memberQueryService;
 //    private final RedisService redisService;
+    @Value("${redirect-url.new-user}")
+    private String mainPageUrl;
+    @Value("${redirect-url.main}")
+    private String newUserFormUrl;
     
     @Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
@@ -76,7 +81,9 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         log.info("accessToken: {}", accessToken);
         log.info("refreshToken: {}", refreshToken);
 
-        response.sendRedirect("http://localhost:9083/");     // 로그인 성공시 프론트에 알려줄 redirect 경로
+        String finalRedirectionUrl = customUserDetail.isNewUser() ? newUserFormUrl : mainPageUrl;
+
+        response.sendRedirect(finalRedirectionUrl);     // 로그인 성공시 프론트에 알려줄 redirect 경로
     }
 
 
