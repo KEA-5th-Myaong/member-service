@@ -2,8 +2,12 @@ package myaong.popolog.memberservice.oauth2.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import myaong.popolog.memberservice.client.BlogServiceClient;
 import myaong.popolog.memberservice.converter.AuthConverter;
+import myaong.popolog.memberservice.converter.MemberConverter;
+import myaong.popolog.memberservice.dto.request.MemberProfileRequest;
 import myaong.popolog.memberservice.entity.Member;
+import myaong.popolog.memberservice.enums.Permission;
 import myaong.popolog.memberservice.oauth2.CustomOAuth2User;
 import myaong.popolog.memberservice.oauth2.dto.GoogleResponse;
 import myaong.popolog.memberservice.oauth2.dto.KakaoResponse;
@@ -25,15 +29,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final MemberQueryService memberQueryService;
     private final MemberCommandService memberCommandService;
+    private final BlogServiceClient blogServiceClient;
 
-    // 여기서 리턴된 MemberDetails 객체는 사용자 인증 정보를 나타내기 위해 Authentication 객체에 담겨지고,
+    // 여기서 리턴된 OAuth2User 객체는 사용자 인증 정보를 나타내기 위해 Authentication 객체에 담겨지고,
     // 이 Authentication 객체는 사용자의 인증 상태를 나타내며, SecurityContext에 저장된다고 보면됨
     @Transactional
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        // TODO: inNewMember가 true이면 최초 로그인이므로 로그인 처리와 토큰 발급 완료 후 개인 정보 설정 페이지로 redirect
+        // isNewMember가 true이면 최초 로그인이므로 로그인 처리와 토큰 발급 완료 후 개인 정보 설정 페이지로 redirect
         boolean isNewMember = false;
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
@@ -60,17 +65,22 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         if (findMember == null) {
             isNewMember = true;
 
+            // member 저장
             Member newMember = AuthConverter.toMember(oAuth2Response);
             Member savedMember = memberCommandService.saveMember(newMember);
 
-            OAuthUserDTO oAuthUserDTO = AuthConverter.toOAuthUserDTO(savedMember.getName(), savedMember.getId(), providerId, "member", savedMember.getProfilePicUrl(), isNewMember);
+            // MemberProfile 저장(POST /blog/profile 호출)
+            MemberProfileRequest.CreateDTO memberProfileCreateDTO = MemberConverter.toMemberProfileCreateDTO(savedMember.getId(), oAuth2Response);
+            blogServiceClient.createMemberProfile(memberProfileCreateDTO);
+
+            OAuthUserDTO oAuthUserDTO = AuthConverter.toOAuthUserDTO(memberProfileCreateDTO.getName(), savedMember.getId(), providerId, Permission.MEMBER.name(), isNewMember);
 
             return new CustomOAuth2User(oAuthUserDTO);
         } else { // 회원정보가 존재한다면 조회된 데이터로 반환
-            findMember.updateInfo(oAuth2Response.getEmail(), oAuth2Response.getName());
-            Member updatedMember = memberCommandService.saveMember(findMember);
+            // TODO: MemberProfile 조회
 
-            OAuthUserDTO oAuthUserDTO = AuthConverter.toOAuthUserDTO(updatedMember.getName(), updatedMember.getId(), providerId, "member", updatedMember.getProfilePicUrl(), isNewMember);
+            // TODO: 여기서 name 값은 findMemberProfile.getName() 호출
+            OAuthUserDTO oAuthUserDTO = AuthConverter.toOAuthUserDTO(oAuth2Response.getName(), findMember.getId(), findMember.getProviderId(), findMember.getPermission().name().toLowerCase(), isNewMember);
 
             return new CustomOAuth2User(oAuthUserDTO);
         }

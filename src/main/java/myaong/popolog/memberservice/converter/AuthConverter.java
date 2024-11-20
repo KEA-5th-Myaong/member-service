@@ -12,17 +12,17 @@ import java.time.LocalDate;
 @Component
 public class AuthConverter {
 
-    public static OAuthUserDTO toOAuthUserDTO(String name, Long memberId, String providerId, String permission, String profilePicUrl, boolean isNewMember) {
+    public static OAuthUserDTO toOAuthUserDTO(String name, Long memberId, String providerId, String permission, boolean isNewMember) {
         return OAuthUserDTO.builder()
                 .name(name)
                 .memberId(memberId)
                 .providerId(providerId)
                 .permission(Permission.valueOfLower(permission))
-                .profilePicUrl(profilePicUrl)
                 .isNewMember(isNewMember)
                 .build();
     }
 
+    // TODO: username, name , nickname, profilePicUrl은 MemberProfile에 저장
     public static Member toMember(OAuth2Response oAuth2Response) {
         return Member.builder()
                         .providerId(oAuth2Response.getProviderId())
@@ -37,4 +37,5 @@ public class AuthConverter {
                         .unbanDate(LocalDate.now())
                         .build();
     }
+
 }

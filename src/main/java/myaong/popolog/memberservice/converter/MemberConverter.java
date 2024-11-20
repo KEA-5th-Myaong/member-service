@@ -1,8 +1,10 @@
 package myaong.popolog.memberservice.converter;
 
+import myaong.popolog.memberservice.dto.request.MemberProfileRequest;
 import myaong.popolog.memberservice.dto.response.MemberResponse;
 import myaong.popolog.memberservice.entity.Follow;
 import myaong.popolog.memberservice.entity.Member;
+import myaong.popolog.memberservice.oauth2.dto.OAuth2Response;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -100,5 +102,12 @@ public class MemberConverter {
                 .build();
     }
 
-
+    public static MemberProfileRequest.CreateDTO toMemberProfileCreateDTO(Long memberId, OAuth2Response oAuth2Response) {
+        return MemberProfileRequest.CreateDTO.builder()
+                .memberId(memberId)
+                .username(oAuth2Response.getName())
+                .name(oAuth2Response.getName())
+                .nickname(oAuth2Response.getNickname())
+               .build();
+    }
 }

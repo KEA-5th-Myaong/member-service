@@ -11,11 +11,11 @@ import java.util.Map;
 public class CustomOAuth2User implements OAuth2User {
 
     private final OAuthUserDTO oAuthUserDTO;
-    private final boolean isNewUser;
+    private final boolean isNewMember;
 
     public CustomOAuth2User(OAuthUserDTO oAuthUserDTO) {
         this.oAuthUserDTO = oAuthUserDTO;
-        this.isNewUser = oAuthUserDTO.isNewMember();
+        this.isNewMember = oAuthUserDTO.isNewMember();
     }
 
     @Override
@@ -50,8 +50,8 @@ public class CustomOAuth2User implements OAuth2User {
         return oAuthUserDTO.getProviderId();
     }
 
-    public boolean isNewUser() {
-        return isNewUser;
+    public boolean isNewMember() {
+        return isNewMember;
     }
 
 }

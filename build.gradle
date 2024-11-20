@@ -58,6 +58,9 @@ dependencies {
     // spring cloud kubernetes
     implementation 'org.springframework.cloud:spring-cloud-starter-kubernetes-client-all'
 
+    // open feign
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 

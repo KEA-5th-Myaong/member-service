@@ -41,7 +41,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
     private final RedisService redisService;
     private final MemberQueryService memberQueryService;
-//    private final RedisService redisService;
     @Value("${redirect-url.new-user}")
     private String mainPageUrl;
     @Value("${redirect-url.main}")
@@ -49,9 +48,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     
     @Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-    	CustomOAuth2User customUserDetail = (CustomOAuth2User) authentication.getPrincipal();
+    	// SecurityContext에서 Authentication 객체 꺼내기
+        CustomOAuth2User customUserDetail = (CustomOAuth2User) authentication.getPrincipal();
         
-        // 토큰 생성시에 category, memberId, providerId 권한이 필요하니 준비하자
+        // 토큰 생성시에 category, memberId, providerId 권한이 필요하니 준비
         Long memberId = customUserDetail.getMemberId();
         String providerId = customUserDetail.getProviderId();
         
@@ -81,7 +81,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         log.info("accessToken: {}", accessToken);
         log.info("refreshToken: {}", refreshToken);
 
-        String finalRedirectionUrl = customUserDetail.isNewUser() ? newUserFormUrl : mainPageUrl;
+        // 신규 회원인지 아닌지에 따라 redirect할 url이 달라짐.
+        String finalRedirectionUrl = customUserDetail.isNewMember() ? newUserFormUrl : mainPageUrl;
 
         response.sendRedirect(finalRedirectionUrl);     // 로그인 성공시 프론트에 알려줄 redirect 경로
     }
