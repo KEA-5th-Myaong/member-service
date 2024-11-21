@@ -8,6 +8,7 @@ import myaong.popolog.memberservice.converter.MemberConverter;
 import myaong.popolog.memberservice.dto.request.MemberProfileRequest;
 import myaong.popolog.memberservice.entity.Member;
 import myaong.popolog.memberservice.enums.Permission;
+import myaong.popolog.memberservice.enums.RequiredInfo;
 import myaong.popolog.memberservice.oauth2.CustomOAuth2User;
 import myaong.popolog.memberservice.oauth2.dto.GoogleResponse;
 import myaong.popolog.memberservice.oauth2.dto.KakaoResponse;
@@ -38,9 +39,6 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
 
-        // isNewMember가 true이면 최초 로그인이므로 로그인 처리와 토큰 발급 완료 후 개인 정보 설정 페이지로 redirect
-        boolean isNewMember = false;
-
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
         OAuth2Response oAuth2Response = null;
@@ -63,24 +61,15 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         // 존재하지 않는 member면 회원정보를 저장하고 CustomOAuth2User 반환
         if (findMember == null) {
-            isNewMember = true;
-
             // member 저장
-            Member newMember = AuthConverter.toMember(oAuth2Response);
+            Member newMember = AuthConverter.toMember(oAuth2Response, RequiredInfo.BOTH);
             Member savedMember = memberCommandService.saveMember(newMember);
 
-            // MemberProfile 저장(POST /blog/profile 호출)
-            MemberProfileRequest.CreateDTO memberProfileCreateDTO = MemberConverter.toMemberProfileCreateDTO(savedMember.getId(), oAuth2Response);
-            blogServiceClient.createMemberProfile(memberProfileCreateDTO);
-
-            OAuthUserDTO oAuthUserDTO = AuthConverter.toOAuthUserDTO(memberProfileCreateDTO.getName(), savedMember.getId(), providerId, Permission.MEMBER.name(), isNewMember);
+            OAuthUserDTO oAuthUserDTO = AuthConverter.toOAuthUserDTO(oAuth2Response.getName(), savedMember.getId(), providerId, Permission.MEMBER.name());
 
             return new CustomOAuth2User(oAuthUserDTO);
         } else { // 회원정보가 존재한다면 조회된 데이터로 반환
-            // TODO: MemberProfile 조회
-
-            // TODO: 여기서 name 값은 findMemberProfile.getName() 호출
-            OAuthUserDTO oAuthUserDTO = AuthConverter.toOAuthUserDTO(oAuth2Response.getName(), findMember.getId(), findMember.getProviderId(), findMember.getPermission().name().toLowerCase(), isNewMember);
+            OAuthUserDTO oAuthUserDTO = AuthConverter.toOAuthUserDTO(oAuth2Response.getName(), findMember.getId(), findMember.getProviderId(), findMember.getPermission().name().toLowerCase());
 
             return new CustomOAuth2User(oAuthUserDTO);
         }

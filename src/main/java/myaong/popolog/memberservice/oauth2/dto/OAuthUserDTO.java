@@ -16,7 +16,4 @@ public class OAuthUserDTO {
 
     // MemberProfile에 저장될 정보
     private String name;
-
-    // DB에 저장 x
-    private boolean isNewMember;
 }

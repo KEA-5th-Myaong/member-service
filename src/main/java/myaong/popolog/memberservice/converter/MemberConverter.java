@@ -1,10 +1,10 @@
 package myaong.popolog.memberservice.converter;
 
 import myaong.popolog.memberservice.dto.request.MemberProfileRequest;
+import myaong.popolog.memberservice.dto.request.MemberRequest;
 import myaong.popolog.memberservice.dto.response.MemberResponse;
 import myaong.popolog.memberservice.entity.Follow;
 import myaong.popolog.memberservice.entity.Member;
-import myaong.popolog.memberservice.oauth2.dto.OAuth2Response;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,21 +21,6 @@ public class MemberConverter {
                 .email(member.getEmail())
                 .profilePicUrl(member.getProfilePicUrl())
                 .build();
-    }
-
-    public static MemberResponse.PartialInfoDTO toPartialInfoDTO(Member member) {
-        return MemberResponse.PartialInfoDTO.builder()
-                .memberId(member.getId())
-                .username(member.getUsername())
-                .nickname(member.getNickname())
-                .build();
-
-    }
-
-    public static MemberResponse.updateProfilePicDTO toUpdateProfilePicDTO() {
-        return MemberResponse.updateProfilePicDTO.builder()
-               .profilePicUrl("https://i.ibb.co/jV6hs1v/image.jpg") // 이미지 하드 코딩
-               .build();
     }
 
     public static MemberResponse.BlogInfoDTO toBlogInfoDTO(Member member) {
@@ -102,12 +87,12 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberProfileRequest.CreateDTO toMemberProfileCreateDTO(Long memberId, OAuth2Response oAuth2Response) {
+    public static MemberProfileRequest.CreateDTO toMemberProfileCreateDTO(Long memberId, MemberRequest.AdditionalBasicInfoDTO dto) {
         return MemberProfileRequest.CreateDTO.builder()
                 .memberId(memberId)
-                .username(oAuth2Response.getName())
-                .name(oAuth2Response.getName())
-                .nickname(oAuth2Response.getNickname())
-               .build();
+                .username(dto.getName())
+                .name(dto.getName())
+                .nickname(dto.getNickname())
+                .build();
     }
 }

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import myaong.popolog.memberservice.enums.Permission;
+import myaong.popolog.memberservice.enums.RequiredInfo;
 import myaong.popolog.memberservice.enums.SocialType;
 
 import java.time.LocalDate;
@@ -67,6 +68,10 @@ public class Member extends BaseEntity {
 	@Column(name = "unban_date", nullable = false)
 	private LocalDate unbanDate;
 
+	// 필요 정보(프로필 정보와 관심 직군 정보가 입력되었는지 판단하는 필드)
+	@Column(name = "required_info", nullable = false)
+	private RequiredInfo requiredInfo;
+
 	// 내가 팔로우하는 사람 목록
 	@OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Follow> followings = new ArrayList<>();
@@ -77,7 +82,7 @@ public class Member extends BaseEntity {
 
 	@Builder
 	public Member(String username, String providerId, String password, SocialType socialType, String name, String nickname, String email,
-				  Permission permission, String profilePicUrl, Integer countAttempt, LocalDate unbanDate) {
+				  Permission permission, String profilePicUrl, Integer countAttempt, LocalDate unbanDate, RequiredInfo requiredInfo) {
 		this.username = username;
 		this.providerId = providerId;
 		this.password = password;
@@ -89,11 +94,19 @@ public class Member extends BaseEntity {
 		this.profilePicUrl = profilePicUrl;
 		this.countAttempt = countAttempt;
 		this.unbanDate = unbanDate;
+		this.requiredInfo = requiredInfo;
 	}
 
-	public void updateInfo(String email, String name) {
+	public void updateBasicInfo(String email) {
 		this.email = email;
-		this.name = name;
+	}
+
+	public void addAdditionalInfo(String username) {
+		this.username = username;
+	}
+
+	public void updateRequiredInfo(RequiredInfo requiredInfo) {
+		this.requiredInfo = requiredInfo;
 	}
 
 	public void initiateCountAttempt() {

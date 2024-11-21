@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import myaong.popolog.memberservice.entity.Member;
 import myaong.popolog.memberservice.entity.RefreshToken;
+import myaong.popolog.memberservice.enums.RequiredInfo;
 import myaong.popolog.memberservice.jwt.JwtUtil;
 import myaong.popolog.memberservice.repository.RefreshTokenRedisRepository;
 import myaong.popolog.memberservice.service.MemberQueryService;
@@ -41,10 +42,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
     private final RedisService redisService;
     private final MemberQueryService memberQueryService;
-    @Value("${redirect-url.new-user}")
-    private String mainPageUrl;
     @Value("${redirect-url.main}")
-    private String newUserFormUrl;
+    private String mainPageUrl;
+    @Value("${redirect-url.profile-form}")
+    private String profileFormUrl;
     
     @Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
@@ -82,7 +83,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         log.info("refreshToken: {}", refreshToken);
 
         // 신규 회원인지 아닌지에 따라 redirect할 url이 달라짐.
-        String finalRedirectionUrl = customUserDetail.isNewMember() ? newUserFormUrl : mainPageUrl;
+        String finalRedirectionUrl = getFinalRedirectionUrl(findMember.getRequiredInfo());
 
         response.sendRedirect(finalRedirectionUrl);     // 로그인 성공시 프론트에 알려줄 redirect 경로
     }
@@ -99,6 +100,17 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 .build());
 
 //        redisService.setValues(providerId, refreshToken, Duration.ofDays(86400000L));
+    }
+
+    public String getFinalRedirectionUrl(RequiredInfo requiredInfo) {
+        String finalRedirectionUrl = switch (requiredInfo) {
+            case BOTH -> profileFormUrl; // 프로필과 관심직군 둘 다 입력 필요
+            case PREJOBS -> mainPageUrl; // 관심직군 입력 필요
+            case COMPLETED -> mainPageUrl; // 둘 다 입력 완료
+            default -> mainPageUrl; // 기본 URL
+        };
+
+        return finalRedirectionUrl;
     }
     
 }
