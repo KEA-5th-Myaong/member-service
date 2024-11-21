@@ -2,20 +2,21 @@ package myaong.popolog.memberservice.converter;
 
 import myaong.popolog.memberservice.dto.request.MemberProfileRequest;
 import myaong.popolog.memberservice.dto.request.MemberRequest;
+import myaong.popolog.memberservice.dto.response.MemberProfileResponse;
 import myaong.popolog.memberservice.dto.response.MemberResponse;
 import myaong.popolog.memberservice.entity.Member;
 import org.springframework.stereotype.Component;
 
 @Component
 public class MemberConverter {
-    public static MemberResponse.BasicInfoDTO toBasicInfoDTO(Member member) {
+    public static MemberResponse.BasicInfoDTO toBasicInfoDTO(Member member, MemberProfileResponse.ProfileInfoDTO dto) {
         return MemberResponse.BasicInfoDTO.builder()
                 .memberId(member.getId())
                 .username(member.getUsername())
-                .name(member.getName())
-                .nickname(member.getNickname())
+                .name(dto.getName())
+                .nickname(dto.getNickname())
                 .email(member.getEmail())
-                .profilePicUrl(member.getProfilePicUrl())
+                .profilePicUrl(dto.getProfilePicUrl())
                 .build();
     }
 

@@ -38,14 +38,6 @@ public class Member extends BaseEntity {
 	@Column(name = "social_type", nullable = false, updatable = false)
 	private SocialType socialType;
 
-	// 본명
-	@Column(name = "name", nullable = false)
-	private String name;
-
-	// 닉네임
-	@Column(name = "nickname", nullable = false)
-	private String nickname;
-
 	@Column(name = "email", nullable = false, unique = true)
 	private String email;
 
@@ -53,10 +45,6 @@ public class Member extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(name = "permission", nullable = false)
 	private Permission permission;
-
-	// 프로필 사진 주소
-	@Column(name = "profile_pic_url")
-	private String profilePicUrl;
 
 	// 로그인 시도 횟수. 로그인 성공 시 초기
 	@Column(name = "count_attempt", nullable = false)
@@ -71,17 +59,14 @@ public class Member extends BaseEntity {
 	private RequiredInfo requiredInfo;
 
 	@Builder
-	public Member(String username, String providerId, String password, SocialType socialType, String name, String nickname, String email,
-				  Permission permission, String profilePicUrl, Integer countAttempt, LocalDate unbanDate, RequiredInfo requiredInfo) {
+	public Member(String username, String providerId, String password, SocialType socialType, String email,
+				  Permission permission, Integer countAttempt, LocalDate unbanDate, RequiredInfo requiredInfo) {
 		this.username = username;
 		this.providerId = providerId;
 		this.password = password;
 		this.socialType = socialType;
-		this.name = name;
-		this.nickname = nickname;
 		this.email = email;
 		this.permission = permission;
-		this.profilePicUrl = profilePicUrl;
 		this.countAttempt = countAttempt;
 		this.unbanDate = unbanDate;
 		this.requiredInfo = requiredInfo;
@@ -97,6 +82,10 @@ public class Member extends BaseEntity {
 
 	public void updateRequiredInfo(RequiredInfo requiredInfo) {
 		this.requiredInfo = requiredInfo;
+	}
+
+	public void updatePassword(String password) {
+		this.password = password;
 	}
 
 	public void initiateCountAttempt() {

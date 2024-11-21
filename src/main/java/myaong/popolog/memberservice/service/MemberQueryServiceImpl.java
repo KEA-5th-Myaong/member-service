@@ -1,9 +1,11 @@
 package myaong.popolog.memberservice.service;
 
 import lombok.RequiredArgsConstructor;
+import myaong.popolog.memberservice.client.BlogServiceClient;
 import myaong.popolog.memberservice.common.exception.ApiCode;
 import myaong.popolog.memberservice.common.exception.ApiException;
 import myaong.popolog.memberservice.converter.MemberConverter;
+import myaong.popolog.memberservice.dto.response.MemberProfileResponse;
 import myaong.popolog.memberservice.dto.response.MemberResponse;
 import myaong.popolog.memberservice.entity.Member;
 import myaong.popolog.memberservice.repository.MemberRepository;
@@ -20,10 +22,16 @@ import java.util.stream.LongStream;
 public class MemberQueryServiceImpl implements MemberQueryService {
     private final MemberRepository memberRepository;
 
+    private final BlogServiceClient blogServiceClient;
+
     @Override
     public MemberResponse.BasicInfoDTO getMemberBasicInfo(Long memberId) {
         Member findMember = findMemberByMemberId(memberId);
-        return MemberConverter.toBasicInfoDTO(findMember);
+
+        // Profile 정보 호출
+        MemberProfileResponse.ProfileInfoDTO profileInfoDTO = blogServiceClient.getProfileInfo(memberId);
+
+        return MemberConverter.toBasicInfoDTO(findMember, profileInfoDTO);
     }
 
     @Override
@@ -43,8 +51,15 @@ public class MemberQueryServiceImpl implements MemberQueryService {
 
     @Override
     public Member findByProviderId(String providerId) {
+        // 예외 처리 다른 곳에서 하므로 이 메서드에서는 할 수 없음
         Member findMember = memberRepository.findByProviderId(providerId);
 
         return findMember;
+    }
+
+    @Override
+    public String findPasswordById(Long memberId) {
+        return memberRepository.findPasswordById(memberId)
+                .orElseThrow(() -> new ApiException(ApiCode.MEMBER_NOT_FOUND));
     }
 }
