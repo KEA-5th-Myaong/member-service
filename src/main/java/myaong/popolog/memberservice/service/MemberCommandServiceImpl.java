@@ -1,13 +1,16 @@
 package myaong.popolog.memberservice.service;
 
 import lombok.RequiredArgsConstructor;
+import myaong.popolog.memberservice.client.BlogServiceClient;
 import myaong.popolog.memberservice.common.exception.ApiCode;
 import myaong.popolog.memberservice.common.exception.ApiException;
 import myaong.popolog.memberservice.converter.MemberConverter;
+import myaong.popolog.memberservice.dto.request.MemberProfileRequest;
 import myaong.popolog.memberservice.dto.request.MemberRequest;
 import myaong.popolog.memberservice.dto.response.MemberResponse;
 import myaong.popolog.memberservice.entity.Follow;
 import myaong.popolog.memberservice.entity.Member;
+import myaong.popolog.memberservice.enums.RequiredInfo;
 import myaong.popolog.memberservice.repository.FollowRepository;
 import myaong.popolog.memberservice.repository.MemberRepository;
 import org.springframework.stereotype.Service;
@@ -21,28 +24,22 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     private final FollowRepository followRepository;
     private final MemberRepository memberRepository;
 
+    private final BlogServiceClient blogServiceClient;
+
     @Override
-    public MemberResponse.FollowDTO followMember(Long memberId) {
-        // 일단 팔로우하는 사람은 id가 5인 member
-        Member followingMember = memberQueryService.findMemberByMemberId(5L);
-        Member followedMember = memberQueryService.findMemberByMemberId(memberId);
+    public void addAdditionalBasicInfo(Long memberId, MemberRequest.AdditionalBasicInfoDTO request) {
+        // Member 조회
+        Member findMember = memberQueryService.findMemberByMemberId(memberId);
 
-        boolean isExist = followRepository.existsByFollowingAndFollowed(followingMember, followedMember);
+        // username만 수정
+        findMember.addAdditionalInfo(request.getUsername());
 
-        MemberResponse.FollowDTO followDTO;
+        // Blog Service로 나머지 데이터 수정 요청, MemberProfile 저장(POST /blog/profile 호출)
+        MemberProfileRequest.CreateDTO memberProfileCreateDTO = MemberConverter.toMemberProfileCreateDTO(findMember.getId(), request);
+        blogServiceClient.createMemberProfile(memberProfileCreateDTO);
 
-        // 팔로우 내역이 이미 존재하면 팔로우 취소
-        if (isExist) {
-            followRepository.deleteByFollowingAndFollowed(followingMember, followedMember);
-            followDTO = MemberConverter.toFollowDTO(false);
-
-        } else { // 새로 팔로우 정보 등록
-            Follow follow = MemberConverter.toFollow(followingMember, followedMember);
-            followRepository.save(follow);
-            followDTO = MemberConverter.toFollowDTO(true);
-        }
-
-        return followDTO;
+        // MemberProfile 정보는 입력됐으므로 관심 직군 정보만 필요
+        findMember.updateRequiredInfo(RequiredInfo.PREJOBS);
     }
 
     @Override
