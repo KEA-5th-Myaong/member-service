@@ -24,10 +24,6 @@ import static myaong.popolog.memberservice.enums.Permission.*;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private static final String[] AUTH_WHITELIST = {
-            "/members/**", "/reissue", "/", "/auth/**", "/login",
-            "/api/**", "/api/vote/**", "/health-check", "/oauth2/**"
-    };
 
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
@@ -45,7 +41,6 @@ public class SecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-//                                .requestMatchers(AUTH_WHITELIST).permitAll()
                                 .requestMatchers(requestMatcherHolder.getRequestMatchersByMinPermission(null)).permitAll()
                                 .requestMatchers(requestMatcherHolder.getRequestMatchersByMinPermission(MEMBER))
                                 .hasAnyAuthority(MEMBER.name(), ADMIN.name(), SUPER.name())

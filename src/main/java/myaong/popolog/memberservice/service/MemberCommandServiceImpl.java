@@ -2,16 +2,11 @@ package myaong.popolog.memberservice.service;
 
 import lombok.RequiredArgsConstructor;
 import myaong.popolog.memberservice.client.BlogServiceClient;
-import myaong.popolog.memberservice.common.exception.ApiCode;
-import myaong.popolog.memberservice.common.exception.ApiException;
 import myaong.popolog.memberservice.converter.MemberConverter;
 import myaong.popolog.memberservice.dto.request.MemberProfileRequest;
 import myaong.popolog.memberservice.dto.request.MemberRequest;
-import myaong.popolog.memberservice.dto.response.MemberResponse;
-import myaong.popolog.memberservice.entity.Follow;
 import myaong.popolog.memberservice.entity.Member;
 import myaong.popolog.memberservice.enums.RequiredInfo;
-import myaong.popolog.memberservice.repository.FollowRepository;
 import myaong.popolog.memberservice.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class MemberCommandServiceImpl implements MemberCommandService {
     private final MemberQueryService memberQueryService;
-    private final FollowRepository followRepository;
     private final MemberRepository memberRepository;
 
     private final BlogServiceClient blogServiceClient;
@@ -32,7 +26,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         Member findMember = memberQueryService.findMemberByMemberId(memberId);
 
         // username만 수정
-        findMember.addAdditionalInfo(request.getUsername());
+        findMember.updateUsername(request.getUsername());
 
         // Blog Service로 나머지 데이터 수정 요청, MemberProfile 저장(POST /blog/profile 호출)
         MemberProfileRequest.CreateDTO memberProfileCreateDTO = MemberConverter.toMemberProfileCreateDTO(findMember.getId(), request);

@@ -10,8 +10,6 @@ import myaong.popolog.memberservice.enums.RequiredInfo;
 import myaong.popolog.memberservice.enums.SocialType;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "`member`")
@@ -72,14 +70,6 @@ public class Member extends BaseEntity {
 	@Column(name = "required_info", nullable = false)
 	private RequiredInfo requiredInfo;
 
-	// 내가 팔로우하는 사람 목록
-	@OneToMany(mappedBy = "following", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Follow> followings = new ArrayList<>();
-
-	// 나를 팔로우하는 사람 목록
-	@OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<Follow> followers = new ArrayList<>();
-
 	@Builder
 	public Member(String username, String providerId, String password, SocialType socialType, String name, String nickname, String email,
 				  Permission permission, String profilePicUrl, Integer countAttempt, LocalDate unbanDate, RequiredInfo requiredInfo) {
@@ -97,11 +87,11 @@ public class Member extends BaseEntity {
 		this.requiredInfo = requiredInfo;
 	}
 
-	public void updateBasicInfo(String email) {
+	public void updateEmail(String email) {
 		this.email = email;
 	}
 
-	public void addAdditionalInfo(String username) {
+	public void updateUsername(String username) {
 		this.username = username;
 	}
 
