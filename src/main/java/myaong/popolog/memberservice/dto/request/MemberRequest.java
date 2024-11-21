@@ -25,6 +25,16 @@ public class MemberRequest {
     }
 
     @Getter
+    public static class UpdatePasswordDTO {
+        @NotBlank(message = "기존 비밀번호를 입력해주세요.")
+        private String originPassword;
+
+        // TODO: 새 비밀번호가 규칙에 맞는지 검증
+        @NotBlank(message = "새 비밀번호를 입력해주세요.")
+        private String newPassword;
+    }
+
+    @Getter
     public static class editBasicInfoDTO {
         @NotBlank(message = "이메일을 입력해주세요.")
         private String email;

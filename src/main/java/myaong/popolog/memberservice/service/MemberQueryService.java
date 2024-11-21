@@ -9,4 +9,5 @@ public interface MemberQueryService {
     Member findMemberByMemberId(Long memberId);
     Member findMemberByUsername(String username);
     Member findByProviderId(String providerId);
+    String findPasswordById(Long memberId);
 }
