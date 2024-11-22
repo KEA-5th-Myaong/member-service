@@ -27,15 +27,13 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     @Override
     public MemberResponse.CheckDuplicateDTO checkDuplicateByUsername(String username) {
         boolean isExist = memberRepository.existsByUsername(username);
-        MemberResponse.CheckDuplicateDTO checkDuplicateDTO = isExist ? MemberConverter.toCheckDuplicateDTO(false) : MemberConverter.toCheckDuplicateDTO(true);
-        return checkDuplicateDTO;
+        return isExist ? MemberConverter.toCheckDuplicateDTO(false) : MemberConverter.toCheckDuplicateDTO(true);
     }
 
     @Override
     public MemberResponse.CheckDuplicateDTO checkDuplicateByEmail(String email) {
         boolean isExist = memberRepository.existsByEmail(email);
-        MemberResponse.CheckDuplicateDTO checkDuplicateDTO = isExist ? MemberConverter.toCheckDuplicateDTO(false) : MemberConverter.toCheckDuplicateDTO(true);
-        return checkDuplicateDTO;
+        return isExist ? MemberConverter.toCheckDuplicateDTO(false) : MemberConverter.toCheckDuplicateDTO(true);
     }
 
     @Override

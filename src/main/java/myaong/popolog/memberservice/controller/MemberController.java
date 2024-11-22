@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import myaong.popolog.memberservice.common.exception.ApiResponse;
-import myaong.popolog.memberservice.converter.MemberConverter;
 import myaong.popolog.memberservice.dto.request.MemberRequest;
 import myaong.popolog.memberservice.dto.response.MemberResponse;
 import myaong.popolog.memberservice.service.MemberCommandService;
@@ -19,7 +18,7 @@ public class MemberController {
     private final MemberCommandService memberCommandService;
 
     @Operation(summary = "API 명세서 v0.4 line 14", description = "기본 정보 추가 입력, 소셜 회원가입 시 필수 데이터를 불러올 수 없어, 사용자에게 필수 데이터를 요청합니다.")
-    @PostMapping("/")
+    @PostMapping
     public ApiResponse addAdditionalBasicInfo(@RequestHeader("memberId") Long memberId,
                                               @RequestBody @Valid MemberRequest.AdditionalBasicInfoDTO request) {
         memberCommandService.addAdditionalBasicInfo(memberId, request);
