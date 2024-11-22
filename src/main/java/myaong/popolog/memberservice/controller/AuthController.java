@@ -6,7 +6,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import myaong.popolog.memberservice.common.exception.ApiResponse;
 import myaong.popolog.memberservice.jwt.JwtUtil;
+import myaong.popolog.memberservice.service.MemberQueryService;
 import myaong.popolog.memberservice.service.RedisService;
 import myaong.popolog.memberservice.util.CookieUtil;
 import org.springframework.http.HttpStatus;
@@ -26,6 +28,7 @@ public class AuthController {
     private final CookieUtil cookieUtil;
     private final JwtUtil jwtUtil;
     private final RedisService redisService;
+    private final MemberQueryService memberQueryService;
 
      // 액세스 토큰 재발급 API, JwtUtil의 redirectReissueURI 메서드에서 여기로 매핑됨
     @GetMapping("/reissue")
@@ -39,7 +42,19 @@ public class AuthController {
         response.setStatus(HttpStatus.OK.value());
     }
 
-    @Operation(summary = "", description = "로그아웃(refresh token 삭제)")
+    @Operation(summary = "API 명세서 v0.4 line 3", description = "로그인 아이디 중복 확인")
+    @GetMapping("/check-duplicate/username")
+    public ApiResponse checkDuplicateByUsername(@RequestParam("username") String username) {
+        return ApiResponse.onSuccess(memberQueryService.checkDuplicateByUsername(username));
+    }
+
+    @Operation(summary = "API 명세서 v0.4 line 4", description = "이메일 중복 확인")
+    @PostMapping("/check-duplicate/email")
+    public ApiResponse checkDuplicateByEmail(@RequestParam("email") String email) {
+        return ApiResponse.onSuccess(memberQueryService.checkDuplicateByEmail(email));
+    }
+
+    @Operation(summary = "API 명세서 v0.4 line 10", description = "로그아웃(refresh token 삭제)")
     @PostMapping("/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         Cookie[] cookies = request.getCookies();

@@ -28,4 +28,10 @@ public class MemberConverter {
                 .nickname(dto.getNickname())
                 .build();
     }
+
+    public static MemberResponse.CheckDuplicateDTO toCheckDuplicateDTO(boolean usable) {
+        return MemberResponse.CheckDuplicateDTO.builder()
+               .usable(usable)
+               .build();
+    }
 }

@@ -23,4 +23,13 @@ public class MemberResponse {
         private String email;
         private String profilePicUrl;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CheckDuplicateDTO {
+        private boolean usable;
+    }
+
 }

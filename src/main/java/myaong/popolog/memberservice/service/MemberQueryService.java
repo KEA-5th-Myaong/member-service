@@ -5,6 +5,8 @@ import myaong.popolog.memberservice.entity.Member;
 
 public interface MemberQueryService {
 
+    MemberResponse.CheckDuplicateDTO checkDuplicateByUsername(String username);
+    MemberResponse.CheckDuplicateDTO checkDuplicateByEmail(String email);
     MemberResponse.BasicInfoDTO getMemberBasicInfo(Long memberId);
     Member findMemberByMemberId(Long memberId);
     Member findMemberByUsername(String username);
