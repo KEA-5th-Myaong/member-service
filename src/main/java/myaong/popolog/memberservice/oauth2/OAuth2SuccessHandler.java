@@ -62,7 +62,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String permission = auth.getAuthority();
         
         // accessToken과 refreshToken 생성
-        String accessToken = jwtUtil.createJwt("access", memberId, providerId, permission, 60*10*1000L);
+        String accessToken = jwtUtil.createJwt("access", memberId, providerId, permission, 60*60*12*1000L); // 초 * 분 * 시 * msec
         // TODO: refresh 토큰에는 사용자 정보 안담아도 됨!
         String refreshToken = jwtUtil.createJwt("refresh", memberId, providerId, permission, 60*60*24*1*1000L);
 
