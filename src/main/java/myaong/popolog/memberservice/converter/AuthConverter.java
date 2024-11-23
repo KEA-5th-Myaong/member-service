@@ -29,8 +29,6 @@ public class AuthConverter {
                         .username(oAuth2Response.getProviderId()) // username 초기 값은 중복되지 않도록 providerId로 설정
                         .password(null)
                         .socialType(SocialType.valueOfLower(oAuth2Response.getProvider()))
-                        .name(oAuth2Response.getName())
-                        .nickname(oAuth2Response.getName())
                         .email(oAuth2Response.getEmail())
                         .permission(Permission.MEMBER)
                         .countAttempt(0)

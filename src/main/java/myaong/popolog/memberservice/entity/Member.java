@@ -55,6 +55,7 @@ public class Member extends BaseEntity {
 	private LocalDate unbanDate;
 
 	// 필요 정보(프로필 정보와 관심 직군 정보가 입력되었는지 판단하는 필드)
+	@Enumerated(EnumType.STRING)
 	@Column(name = "required_info", nullable = false)
 	private RequiredInfo requiredInfo;
 

@@ -2,10 +2,7 @@ package myaong.popolog.memberservice.oauth2.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import myaong.popolog.memberservice.client.BlogServiceClient;
 import myaong.popolog.memberservice.converter.AuthConverter;
-import myaong.popolog.memberservice.converter.MemberConverter;
-import myaong.popolog.memberservice.dto.request.MemberProfileRequest;
 import myaong.popolog.memberservice.entity.Member;
 import myaong.popolog.memberservice.enums.Permission;
 import myaong.popolog.memberservice.enums.RequiredInfo;
@@ -30,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     private final MemberQueryService memberQueryService;
     private final MemberCommandService memberCommandService;
-    private final BlogServiceClient blogServiceClient;
 
     // 여기서 리턴된 OAuth2User 객체는 사용자 인증 정보를 나타내기 위해 Authentication 객체에 담겨지고,
     // 이 Authentication 객체는 사용자의 인증 상태를 나타내며, SecurityContext에 저장된다고 보면됨

@@ -23,7 +23,7 @@ public class MemberConverter {
     public static MemberProfileRequest.CreateDTO toMemberProfileCreateDTO(Long memberId, MemberRequest.AdditionalBasicInfoDTO dto) {
         return MemberProfileRequest.CreateDTO.builder()
                 .memberId(memberId)
-                .username(dto.getName())
+                .username(dto.getUsername())
                 .name(dto.getName())
                 .nickname(dto.getNickname())
                 .build();
