@@ -10,7 +10,6 @@ import myaong.popolog.memberservice.dto.request.MemberRequest;
 import myaong.popolog.memberservice.entity.Member;
 import myaong.popolog.memberservice.enums.RequiredInfo;
 import myaong.popolog.memberservice.repository.MemberRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,8 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class MemberCommandServiceImpl implements MemberCommandService {
     private final MemberQueryService memberQueryService;
     private final MemberRepository memberRepository;
-
-    private final PasswordEncoder passwordEncoder;
 
     private final BlogServiceClient blogServiceClient;
 
@@ -42,20 +39,6 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     }
 
     @Override
-    public boolean checkPassword(Long memberId, MemberRequest.CheckPasswordDTO request) {
-        String findPassword = memberQueryService.findPasswordById(memberId);
-        validPassword(request.getPassword(), findPassword);
-        return true;
-    }
-
-    @Override
-    public void updatePassword(Long memberId, MemberRequest.UpdatePasswordDTO request) {
-        Member findMember = memberQueryService.findMemberByMemberId(memberId);
-        validPassword(request.getOriginPassword(), findMember.getPassword());
-        findMember.updatePassword(passwordEncoder.encode(request.getNewPassword()));
-    }
-
-    @Override
     public void editBasicInfo(Long memberId, MemberRequest.editBasicInfoDTO request) {
         Member findMember = memberQueryService.findMemberByMemberId(memberId);
         findMember.updateEmail(request.getEmail());
@@ -66,12 +49,4 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         return memberRepository.save(member);
     }
 
-    // 요청 값으로 들어온 비밀번호가 기존의 인코딩된 비밀번호와 일치하는지 확인
-    private void validPassword(String rawPassword, String encodedPassword) {
-        boolean matches = passwordEncoder.matches(rawPassword, encodedPassword);
-
-        if (matches == false) {
-            throw new ApiException(ApiCode.RE_AUTHENTICATION_FAILURE);
-        }
-    }
 }

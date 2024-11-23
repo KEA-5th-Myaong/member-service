@@ -30,8 +30,8 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final JwtFilter jwtFilter;
-    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
-    private final JwtAuthenticationFailEntryPoint jwtAuthenticationFailEntryPoint;
+//    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+//    private final JwtAuthenticationFailEntryPoint jwtAuthenticationFailEntryPoint;
     private final RequestMatcherHolder requestMatcherHolder;
 
     @Bean
