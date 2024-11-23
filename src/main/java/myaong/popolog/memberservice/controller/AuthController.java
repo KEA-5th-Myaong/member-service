@@ -58,6 +58,7 @@ public class AuthController {
         return ApiResponse.onSuccess(memberQueryService.checkDuplicateByEmail(email));
     }
 
+    // TODO: Access token도 받아서 만료시키기
     @Operation(summary = "API 명세서 v0.5 line 10", description = "로그아웃(refresh token 삭제)")
     @PostMapping("/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) {

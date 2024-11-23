@@ -34,8 +34,7 @@ public class MemberController {
     @Operation(summary = "API 명세서 v0.5 line 18", description = "기본 정보 수정")
     @PutMapping
     public ApiResponse editBasicInfo(@RequestHeader("memberId") Long memberId, @RequestBody @Valid MemberRequest.editBasicInfoDTO request) {
-        memberCommandService.editBasicInfo(memberId, request
-        );
+        memberCommandService.editBasicInfo(memberId, request);
         return ApiResponse.onSuccess(null);
     }
 
