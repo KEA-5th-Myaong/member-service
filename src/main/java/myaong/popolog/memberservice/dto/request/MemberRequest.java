@@ -13,8 +13,9 @@ public class MemberRequest {
 
         private String nickname;
 
+        // TODO: 아이디 형식 정규식 검증
         @NotBlank(message = "아이디는 공백일 수 없습니다.")
-        @Size(max = 10, message = "아이디는 최대 10자까지만 가능합니다.")
+        @Size(min = 6, max = 12, message = "아이디는 6~12자 이내로 가능합니다.")
         private String username;
     }
 
@@ -27,15 +28,18 @@ public class MemberRequest {
     @Getter
     public static class UpdatePasswordDTO {
         @NotBlank(message = "기존 비밀번호를 입력해주세요.")
+        @Size(min = 8, max = 20, message = "비밀번호는 8~20자 이내로 가능합니다.")
         private String originPassword;
 
-        // TODO: 새 비밀번호가 규칙에 맞는지 검증
+        // TODO: 새 비밀번호가 규칙에 맞는지 검증(정규식)
         @NotBlank(message = "새 비밀번호를 입력해주세요.")
+        @Size(min = 8, max = 20, message = "비밀번호는 8~20자 이내로 가능합니다.")
         private String newPassword;
     }
 
     @Getter
     public static class editBasicInfoDTO {
+        // TODO: 이메일 형식 정규식 검증
         @NotBlank(message = "이메일을 입력해주세요.")
         private String email;
     }
