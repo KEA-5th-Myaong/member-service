@@ -75,6 +75,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         findMember.initiateCountAttempt();
 
         // 응답
+        // TODO: redirect하면 헤더와 쿠키에 값이 사라지므로 url에 쿼리 파라미터로 전달
         response.setHeader(AUTHORIZATION_HEADER, AUTH_TYPE + accessToken);
         response.addCookie(cookieUtil.createCookie(REFRESH_KEY_NAME, refreshToken));
         response.setStatus(HttpStatus.OK.value());

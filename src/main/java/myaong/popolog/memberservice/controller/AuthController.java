@@ -7,22 +7,27 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import myaong.popolog.memberservice.common.annotation.EmailFormat;
 import myaong.popolog.memberservice.common.annotation.LoginIdFormat;
 import myaong.popolog.memberservice.common.exception.ApiResponse;
+import myaong.popolog.memberservice.dto.request.AuthRequest;
 import myaong.popolog.memberservice.dto.request.MemberRequest;
 import myaong.popolog.memberservice.jwt.JwtUtil;
 import myaong.popolog.memberservice.service.AuthService;
 import myaong.popolog.memberservice.service.MemberQueryService;
 import myaong.popolog.memberservice.service.RedisService;
 import myaong.popolog.memberservice.util.CookieUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
@@ -31,6 +36,9 @@ public class AuthController {
     private static final String REFRESH_KEY_NAME = "refresh";
     private static final String AUTH_TYPE = "Bearer ";
     private static final String AUTHORIZATION_HEADER = "Authorization";
+
+    @Value("${redirect-url.login}")
+    private String loginPageUrl;
 
     private final CookieUtil cookieUtil;
     private final JwtUtil jwtUtil;
@@ -60,6 +68,19 @@ public class AuthController {
     @GetMapping("/check-duplicate/email")
     public ApiResponse checkDuplicateByEmail(@EmailFormat @RequestParam("email") String email) {
         return ApiResponse.onSuccess(memberQueryService.checkDuplicateByEmail(email));
+    }
+
+    @Operation(summary = "API 명세서 v0.4 line 7", description = "회원가입")
+    @PostMapping("/sign-up")
+    public void signUp(@RequestBody @Valid AuthRequest.SignUpDTO request, HttpServletResponse response) {
+        authService.signUp(request);
+
+        // 로그인 페이지로 리다이렉트
+        try {
+            response.sendRedirect(loginPageUrl);
+        } catch (IOException e) {
+            log.info("redirect failed", e);
+        }
     }
 
     @Operation(summary = "API 명세서 v0.4 line 10", description = "로그아웃(refresh token 삭제)")
@@ -103,17 +124,4 @@ public class AuthController {
         response.addCookie(cookie);
     }
 
-//    @Operation(summary = "API 명세서 v0.4 line 16", description = "개인정보 수정 시 비밀번호 일치 확인")
-//    @PostMapping("/check-password")
-//    public ApiResponse<Boolean> checkPassword(@RequestHeader("memberId") Long memberId, @RequestBody @Valid MemberRequest.CheckPasswordDTO request) {
-//        boolean matches = authService.checkPassword(memberId, request);
-//        return ApiResponse.onSuccess(matches);
-//    }
-//
-//    @Operation(summary = "API 명세서 v0.4 line 17", description = "비밀번호 변경")
-//    @PutMapping("/password")
-//    public ApiResponse updatePassword(@RequestHeader("memberId") Long memberId, @RequestBody @Valid MemberRequest.UpdatePasswordDTO request ) {
-//        authService.updatePassword(memberId, request);
-//        return ApiResponse.onSuccess(null);
-//    }
 }

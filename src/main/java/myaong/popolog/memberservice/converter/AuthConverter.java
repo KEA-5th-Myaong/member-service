@@ -1,5 +1,6 @@
 package myaong.popolog.memberservice.converter;
 
+import myaong.popolog.memberservice.dto.request.AuthRequest;
 import myaong.popolog.memberservice.entity.Member;
 import myaong.popolog.memberservice.enums.Permission;
 import myaong.popolog.memberservice.enums.RequiredInfo;
@@ -22,8 +23,9 @@ public class AuthConverter {
                 .build();
     }
 
+    // 소셜 로그인 회원
     // name , nickname, profilePicUrl은 MemberProfile에만 저장
-    public static Member toMember(OAuth2Response oAuth2Response, RequiredInfo requiredInfo) {
+    public static Member toOAuthMember(OAuth2Response oAuth2Response, RequiredInfo requiredInfo) {
         return Member.builder()
                         .providerId(oAuth2Response.getProviderId())
                         .username(oAuth2Response.getProviderId()) // username 초기 값은 중복되지 않도록 providerId로 설정
@@ -35,6 +37,22 @@ public class AuthConverter {
                         .unbanDate(LocalDate.now())
                         .requiredInfo(requiredInfo)
                         .build();
+    }
+
+    // 일반 회원가입
+    public static Member toNormalMember(AuthRequest.SignUpDTO dto) {
+        return Member.builder()
+                .providerId(null)
+                .username(dto.getUsername())
+                .password(dto.getPassword())
+                .socialType(SocialType.NORMAL)
+                .email(dto.getEmail())
+                .permission(Permission.MEMBER)
+                .countAttempt(0)
+                .unbanDate(LocalDate.now())
+                .requiredInfo(RequiredInfo.PREJOBS)
+                .build();
+
     }
 
 }

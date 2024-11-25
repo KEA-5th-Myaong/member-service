@@ -33,13 +33,6 @@ public class MemberController {
         return ApiResponse.onSuccess(memberQueryService.getMemberBasicInfo(memberId));
     }
 
-    @Operation(summary = "API 명세서 v0.4 line 18", description = "기본 정보 수정")
-    @PutMapping
-    public ApiResponse editBasicInfo(@RequestHeader("memberId") Long memberId, @RequestBody @Valid MemberRequest.editBasicInfoDTO request) {
-        memberCommandService.editBasicInfo(memberId, request);
-        return ApiResponse.onSuccess(null);
-    }
-
     @Operation(summary = "API 명세서 v0.4 line 16", description = "개인정보 수정 시 비밀번호 일치 확인")
     @PostMapping("/check-password")
     public ApiResponse<Boolean> checkPassword(@RequestHeader("memberId") Long memberId, @RequestBody @Valid MemberRequest.CheckPasswordDTO request) {
@@ -51,6 +44,13 @@ public class MemberController {
     @PutMapping("/password")
     public ApiResponse updatePassword(@RequestHeader("memberId") Long memberId, @RequestBody @Valid MemberRequest.UpdatePasswordDTO request ) {
         authService.updatePassword(memberId, request);
+        return ApiResponse.onSuccess(null);
+    }
+
+    @Operation(summary = "API 명세서 v0.4 line 18", description = "기본 정보 수정")
+    @PutMapping
+    public ApiResponse editBasicInfo(@RequestHeader("memberId") Long memberId, @RequestBody @Valid MemberRequest.editBasicInfoDTO request) {
+        memberCommandService.editBasicInfo(memberId, request);
         return ApiResponse.onSuccess(null);
     }
 }
