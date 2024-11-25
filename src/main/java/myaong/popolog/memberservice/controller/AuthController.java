@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import myaong.popolog.memberservice.common.annotation.EmailFormat;
 import myaong.popolog.memberservice.common.exception.ApiResponse;
 import myaong.popolog.memberservice.dto.request.MemberRequest;
 import myaong.popolog.memberservice.jwt.JwtUtil;
@@ -15,6 +16,7 @@ import myaong.popolog.memberservice.service.MemberQueryService;
 import myaong.popolog.memberservice.service.RedisService;
 import myaong.popolog.memberservice.util.CookieUtil;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -23,6 +25,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth")
+@Validated
 public class AuthController {
     private static final String REFRESH_KEY_NAME = "refresh";
     private static final String AUTH_TYPE = "Bearer ";
@@ -56,7 +59,7 @@ public class AuthController {
     // TODO: 이메일 정규식 검증
     @Operation(summary = "API 명세서 v0.4 line 4", description = "이메일 중복 확인")
     @GetMapping("/check-duplicate/email")
-    public ApiResponse checkDuplicateByEmail(@RequestParam("email") String email) {
+    public ApiResponse checkDuplicateByEmail(@EmailFormat @RequestParam("email") String email) {
         return ApiResponse.onSuccess(memberQueryService.checkDuplicateByEmail(email));
     }
 
