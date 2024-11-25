@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import myaong.popolog.memberservice.common.annotation.EmailFormat;
+import myaong.popolog.memberservice.common.annotation.LoginIdFormat;
 import myaong.popolog.memberservice.common.exception.ApiResponse;
 import myaong.popolog.memberservice.dto.request.MemberRequest;
 import myaong.popolog.memberservice.jwt.JwtUtil;
@@ -49,21 +50,18 @@ public class AuthController {
         response.setStatus(HttpStatus.OK.value());
     }
 
-    // TODO: 아이디 정규식 검증
     @Operation(summary = "API 명세서 v0.4 line 3", description = "로그인 아이디 중복 확인")
     @GetMapping("/check-duplicate/username")
-    public ApiResponse checkDuplicateByUsername(@RequestParam("username") String username) {
+    public ApiResponse checkDuplicateByUsername(@LoginIdFormat @RequestParam("username") String username) {
         return ApiResponse.onSuccess(memberQueryService.checkDuplicateByUsername(username));
     }
 
-    // TODO: 이메일 정규식 검증
     @Operation(summary = "API 명세서 v0.4 line 4", description = "이메일 중복 확인")
     @GetMapping("/check-duplicate/email")
     public ApiResponse checkDuplicateByEmail(@EmailFormat @RequestParam("email") String email) {
         return ApiResponse.onSuccess(memberQueryService.checkDuplicateByEmail(email));
     }
 
-    // TODO: Access token도 받아서 만료시키기
     @Operation(summary = "API 명세서 v0.4 line 10", description = "로그아웃(refresh token 삭제)")
     @PostMapping("/logout")
     public void logout(HttpServletRequest request, HttpServletResponse response) {
@@ -105,19 +103,17 @@ public class AuthController {
         response.addCookie(cookie);
     }
 
-    // TODO: 비밀번호가 규칙에 맞는지 검증(정규식)
-    @Operation(summary = "API 명세서 v0.4 line 16", description = "개인정보 수정 시 비밀번호 일치 확인")
-    @PostMapping("/check-password")
-    public ApiResponse checkPassword(@RequestHeader("memberId") Long memberId, @RequestBody @Valid MemberRequest.CheckPasswordDTO request) {
-        boolean matches = authService.checkPassword(memberId, request);
-        return ApiResponse.onSuccess(matches);
-    }
-
-    // TODO: 비밀번호가 규칙에 맞는지 검증(정규식)
-    @Operation(summary = "API 명세서 v0.4 line 17", description = "비밀번호 변경")
-    @PutMapping("/password")
-    public ApiResponse updatePassword(@RequestHeader("memberId") Long memberId, @RequestBody @Valid MemberRequest.UpdatePasswordDTO request ) {
-        authService.updatePassword(memberId, request);
-        return ApiResponse.onSuccess(null);
-    }
+//    @Operation(summary = "API 명세서 v0.4 line 16", description = "개인정보 수정 시 비밀번호 일치 확인")
+//    @PostMapping("/check-password")
+//    public ApiResponse<Boolean> checkPassword(@RequestHeader("memberId") Long memberId, @RequestBody @Valid MemberRequest.CheckPasswordDTO request) {
+//        boolean matches = authService.checkPassword(memberId, request);
+//        return ApiResponse.onSuccess(matches);
+//    }
+//
+//    @Operation(summary = "API 명세서 v0.4 line 17", description = "비밀번호 변경")
+//    @PutMapping("/password")
+//    public ApiResponse updatePassword(@RequestHeader("memberId") Long memberId, @RequestBody @Valid MemberRequest.UpdatePasswordDTO request ) {
+//        authService.updatePassword(memberId, request);
+//        return ApiResponse.onSuccess(null);
+//    }
 }

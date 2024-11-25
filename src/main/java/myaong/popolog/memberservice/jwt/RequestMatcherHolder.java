@@ -32,15 +32,20 @@ public class RequestMatcherHolder {
         new RequestInfo(GET, "/webjars/**",null),
 
         // user
-        new RequestInfo(GET, "/members/**", null),
-        new RequestInfo(GET, "/admin/**", Permission.ADMIN),
-        new RequestInfo(GET, "/super/**", Permission.SUPER),
-        new RequestInfo(GET, "/member/**", Permission.MEMBER),
+        new RequestInfo(GET, "/members/**", Permission.MEMBER),
+        new RequestInfo(PUT, "/members/**", Permission.MEMBER),
+        new RequestInfo(POST, "/members/**", Permission.MEMBER),
+        new RequestInfo(DELETE, "/members/**", Permission.MEMBER),
+
         // static resources
         new RequestInfo(GET, "/docs/**", null),
         new RequestInfo(GET, "/*.ico", null),
         new RequestInfo(GET, "/resources/**", null),
-        new RequestInfo(GET, "/error", null)
+        new RequestInfo(GET, "/error", null),
+
+        // 각 Permission의 권한이 필요한 RequestInfo가 최소 1개씩은 리스트에 있어야함
+        new RequestInfo(GET, "/admin/**", Permission.ADMIN),
+        new RequestInfo(GET, "/super/**", Permission.SUPER)
     );
     private final ConcurrentHashMap<String, RequestMatcher> reqMatcherCacheMap = new ConcurrentHashMap<>();
 
