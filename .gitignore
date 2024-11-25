@@ -43,3 +43,6 @@ out/
 *.yml
 
 *.sql
+
+# bootstrap.yml 파일은 ignore 하지 않음
+!bootstrap.yml

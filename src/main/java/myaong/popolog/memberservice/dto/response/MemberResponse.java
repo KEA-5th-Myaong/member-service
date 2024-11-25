@@ -28,79 +28,8 @@ public class MemberResponse {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class PartialInfoDTO {
-        private Long memberId;
-        private String username;
-        private String nickname;
-    }
-
-    @Builder
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class updateProfilePicDTO {
-        private String profilePicUrl;
-    }
-
-    // 블로그 접속 시 응답
-    @Builder
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class BlogInfoDTO {
-        private Long memberId;
-        private String nickname;
-        private int followingCount;
-        private int followerCount;
-        private String profilePicUrl;
-    }
-
-    @Builder
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class FollowDTO {
-        private boolean following;
-    }
-
-    @Builder
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class FollowingDTO {
-        private Long memberId;
-        private String nickname;
-        private String profilePicUrl;
-        private boolean isFollowed;
-    }
-
-    @Builder
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class FollowingListDTO {
-        private Long lastId;
-        private List<FollowingDTO> followingDTOList = new ArrayList<>();
-    }
-
-    @Builder
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class FollowedDTO {
-        private Long memberId;
-        private String nickname;
-        private String profilePicUrl;
-        private boolean isFollowed;
-    }
-
-    @Builder
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class FollowedListDTO {
-        private Long lastId;
-        private List<FollowedDTO> followedDTOList = new ArrayList<>();
+    public static class CheckDuplicateDTO {
+        private boolean usable;
     }
 
 }

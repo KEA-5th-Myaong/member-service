@@ -1,9 +1,11 @@
 package myaong.popolog.memberservice.service;
 
 import lombok.RequiredArgsConstructor;
+import myaong.popolog.memberservice.client.BlogServiceClient;
 import myaong.popolog.memberservice.common.exception.ApiCode;
 import myaong.popolog.memberservice.common.exception.ApiException;
 import myaong.popolog.memberservice.converter.MemberConverter;
+import myaong.popolog.memberservice.dto.response.MemberProfileResponse;
 import myaong.popolog.memberservice.dto.response.MemberResponse;
 import myaong.popolog.memberservice.entity.Member;
 import myaong.popolog.memberservice.repository.MemberRepository;
@@ -20,52 +22,28 @@ import java.util.stream.LongStream;
 public class MemberQueryServiceImpl implements MemberQueryService {
     private final MemberRepository memberRepository;
 
+    private final BlogServiceClient blogServiceClient;
+
+    @Override
+    public MemberResponse.CheckDuplicateDTO checkDuplicateByUsername(String username) {
+        boolean isExist = memberRepository.existsByUsername(username);
+        return isExist ? MemberConverter.toCheckDuplicateDTO(false) : MemberConverter.toCheckDuplicateDTO(true);
+    }
+
+    @Override
+    public MemberResponse.CheckDuplicateDTO checkDuplicateByEmail(String email) {
+        boolean isExist = memberRepository.existsByEmail(email);
+        return isExist ? MemberConverter.toCheckDuplicateDTO(false) : MemberConverter.toCheckDuplicateDTO(true);
+    }
+
     @Override
     public MemberResponse.BasicInfoDTO getMemberBasicInfo(Long memberId) {
         Member findMember = findMemberByMemberId(memberId);
-        return MemberConverter.toBasicInfoDTO(findMember);
-    }
 
-    @Override
-    public MemberResponse.PartialInfoDTO getMemberPartialInfoByMemberId(Long memberId) {
-        Member findMember = findMemberByMemberId(5L);
-        return MemberConverter.toPartialInfoDTO(findMember);
-    }
+        // Profile 정보 호출
+        MemberProfileResponse.ProfileInfoDTO profileInfoDTO = blogServiceClient.getProfileInfo(memberId);
 
-    @Override
-    public MemberResponse.PartialInfoDTO getMemberPartialInfoByUsername(String username) {
-        Member findMember = findMemberByUsername(username);
-        return MemberConverter.toPartialInfoDTO(findMember);
-    }
-
-    @Override
-    public MemberResponse.BlogInfoDTO getMemberBlogInfo(Long memberId) {
-        Member findMember = findMemberByMemberId(memberId);
-        return MemberConverter.toBlogInfoDTO(findMember);
-    }
-
-    @Override
-    public MemberResponse.FollowingListDTO getMemberFollowingList(Long memberId, Long lastId) {
-        // 1부터 10까지의 ID 리스트 생성
-        List<Long> ids = LongStream.rangeClosed(1, 10)
-                .boxed()
-                .collect(Collectors.toList());
-
-        List<Member> findMemberList = memberRepository.findByIdIn(ids);
-
-        return MemberConverter.toFollowingListDTO(findMemberList);
-    }
-
-    @Override
-    public MemberResponse.FollowedListDTO getMemberFollowedList(Long memberId, Long lastId) {
-        // 1부터 10까지의 ID 리스트 생성
-        List<Long> ids = LongStream.rangeClosed(1, 10)
-                .boxed()
-                .collect(Collectors.toList());
-
-        List<Member> findMemberList = memberRepository.findByIdIn(ids);
-
-        return MemberConverter.toFollowedListDTO(findMemberList);
+        return MemberConverter.toBasicInfoDTO(findMember, profileInfoDTO);
     }
 
     @Override
@@ -85,8 +63,15 @@ public class MemberQueryServiceImpl implements MemberQueryService {
 
     @Override
     public Member findByProviderId(String providerId) {
+        // 예외 처리 다른 곳에서 하므로 이 메서드에서는 할 수 없음
         Member findMember = memberRepository.findByProviderId(providerId);
 
         return findMember;
+    }
+
+    @Override
+    public String findPasswordById(Long memberId) {
+        return memberRepository.findPasswordById(memberId)
+                .orElseThrow(() -> new ApiException(ApiCode.MEMBER_NOT_FOUND));
     }
 }

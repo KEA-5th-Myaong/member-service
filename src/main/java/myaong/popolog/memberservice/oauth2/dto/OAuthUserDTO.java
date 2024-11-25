@@ -9,11 +9,11 @@ import myaong.popolog.memberservice.enums.Permission;
 @NoArgsConstructor
 public class OAuthUserDTO {
 
-    private String name;
+    // Member에 저장될 정보
     private Long memberId;
-    // 서버에서 발급받는 아이디
     private String providerId;
     private Permission permission;
-    private String profilePicUrl;
-    private boolean isNewMember;
+
+    // MemberProfile에 저장될 정보
+    private String name;
 }

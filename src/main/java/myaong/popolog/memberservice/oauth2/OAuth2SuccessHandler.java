@@ -6,11 +6,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import myaong.popolog.memberservice.entity.Member;
 import myaong.popolog.memberservice.entity.RefreshToken;
+import myaong.popolog.memberservice.enums.RequiredInfo;
 import myaong.popolog.memberservice.jwt.JwtUtil;
 import myaong.popolog.memberservice.repository.RefreshTokenRedisRepository;
 import myaong.popolog.memberservice.service.MemberQueryService;
 import myaong.popolog.memberservice.service.RedisService;
 import myaong.popolog.memberservice.util.CookieUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -40,13 +42,17 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
     private final RedisService redisService;
     private final MemberQueryService memberQueryService;
-//    private final RedisService redisService;
+    @Value("${redirect-url.main}")
+    private String mainPageUrl;
+    @Value("${redirect-url.profile-form}")
+    private String profileFormUrl;
     
     @Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-    	CustomOAuth2User customUserDetail = (CustomOAuth2User) authentication.getPrincipal();
+    	// SecurityContext에서 Authentication 객체 꺼내기
+        CustomOAuth2User customUserDetail = (CustomOAuth2User) authentication.getPrincipal();
         
-        // 토큰 생성시에 category, memberId, providerId 권한이 필요하니 준비하자
+        // 토큰 생성시에 category, memberId, providerId 권한이 필요하니 준비
         Long memberId = customUserDetail.getMemberId();
         String providerId = customUserDetail.getProviderId();
         
@@ -56,7 +62,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String permission = auth.getAuthority();
         
         // accessToken과 refreshToken 생성
-        String accessToken = jwtUtil.createJwt("access", memberId, providerId, permission, 60*10*1000L);
+        String accessToken = jwtUtil.createJwt("access", memberId, providerId, permission, 60*60*12*1000L); // 초 * 분 * 시 * msec
         // TODO: refresh 토큰에는 사용자 정보 안담아도 됨!
         String refreshToken = jwtUtil.createJwt("refresh", memberId, providerId, permission, 60*60*24*1*1000L);
 
@@ -76,7 +82,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         log.info("accessToken: {}", accessToken);
         log.info("refreshToken: {}", refreshToken);
 
-        response.sendRedirect("http://localhost:9083/");     // 로그인 성공시 프론트에 알려줄 redirect 경로
+        // 신규 회원인지 아닌지에 따라 redirect할 url이 달라짐.
+        String finalRedirectionUrl = getFinalRedirectionUrl(findMember.getRequiredInfo());
+
+        response.sendRedirect(finalRedirectionUrl);     // 로그인 성공시 프론트에 알려줄 redirect 경로
     }
 
 
@@ -91,6 +100,17 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 .build());
 
 //        redisService.setValues(providerId, refreshToken, Duration.ofDays(86400000L));
+    }
+
+    public String getFinalRedirectionUrl(RequiredInfo requiredInfo) {
+        String finalRedirectionUrl = switch (requiredInfo) {
+            case BOTH -> profileFormUrl; // 프로필과 관심직군 둘 다 입력 필요
+            case PREJOBS -> mainPageUrl; // 관심직군 입력 필요
+            case COMPLETED -> mainPageUrl; // 둘 다 입력 완료
+            default -> mainPageUrl; // 기본 URL
+        };
+
+        return finalRedirectionUrl;
     }
     
 }

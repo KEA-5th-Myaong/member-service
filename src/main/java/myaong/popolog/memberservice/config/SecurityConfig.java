@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -24,17 +26,18 @@ import static myaong.popolog.memberservice.enums.Permission.*;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private static final String[] AUTH_WHITELIST = {
-            "/members/**", "/reissue", "/", "/auth/**", "/login",
-            "/api/**", "/api/vote/**", "/health-check", "/oauth2/**"
-    };
 
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final JwtFilter jwtFilter;
-    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
-    private final JwtAuthenticationFailEntryPoint jwtAuthenticationFailEntryPoint;
+//    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+//    private final JwtAuthenticationFailEntryPoint jwtAuthenticationFailEntryPoint;
     private final RequestMatcherHolder requestMatcherHolder;
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -45,7 +48,6 @@ public class SecurityConfig {
                 .httpBasic(basic -> basic.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-//                                .requestMatchers(AUTH_WHITELIST).permitAll()
                                 .requestMatchers(requestMatcherHolder.getRequestMatchersByMinPermission(null)).permitAll()
                                 .requestMatchers(requestMatcherHolder.getRequestMatchersByMinPermission(MEMBER))
                                 .hasAnyAuthority(MEMBER.name(), ADMIN.name(), SUPER.name())

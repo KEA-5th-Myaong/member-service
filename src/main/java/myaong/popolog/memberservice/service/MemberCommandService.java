@@ -6,7 +6,7 @@ import myaong.popolog.memberservice.entity.Member;
 
 public interface MemberCommandService {
 
-    MemberResponse.FollowDTO followMember(Long memberId);
-    void editBasicInfo(MemberRequest.editBasicInfoDTO request);
+    void addAdditionalBasicInfo(Long memberId, MemberRequest.AdditionalBasicInfoDTO request);
+    void editBasicInfo(Long memberId, MemberRequest.editBasicInfoDTO request);
     Member saveMember(Member member);
 }
