@@ -27,21 +27,21 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import static myaong.popolog.memberservice.common.Constants.*;
+
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private static final long REFRESH_DURATION_MILLIS = 60 * 60 * 24 * 1000 * 1L;
-    private static final String REFRESH_KEY_NAME = "refresh";
-    private static final String AUTH_TYPE = "Bearer ";
-    private static final String AUTHORIZATION_HEADER = "Authorization";
 
 	private final JwtUtil jwtUtil;
     private final CookieUtil cookieUtil;
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
     private final RedisService redisService;
     private final MemberQueryService memberQueryService;
+
     @Value("${redirect-url.main}")
     private String mainPageUrl;
     @Value("${redirect-url.profile-form}")
@@ -62,11 +62,11 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String permission = auth.getAuthority();
         
         // accessToken과 refreshToken 생성
-        String accessToken = jwtUtil.createJwt("access", memberId, providerId, permission, 60*60*12*1000L); // 초 * 분 * 시 * msec
+        String accessToken = jwtUtil.createJwt(ACCESS_KEY_NAME, memberId, providerId, permission, 60*60*12*1000L); // 초 * 분 * 시 * msec
         // TODO: refresh 토큰에는 사용자 정보 안담아도 됨!
-        String refreshToken = jwtUtil.createJwt("refresh", memberId, providerId, permission, 60*60*24*1*1000L);
+        String refreshToken = jwtUtil.createJwt(REFRESH_KEY_NAME, memberId, providerId, permission, 60*60*24*1*1000L);
 
-        // redis에 insert (key = providerId / value = refreshToken)
+        // redis에 insert (key = memberId / value = refreshToken)
         redisService.setValues(String.valueOf(memberId), refreshToken, Duration.ofMillis(REFRESH_DURATION_MILLIS));
 //        saveRefreshTokenOnRedis(providerId, refreshToken, permission);
 
@@ -100,7 +100,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 .refreshToken(refreshToken)
                 .build());
 
-//        redisService.setValues(providerId, refreshToken, Duration.ofDays(86400000L));
+//        redisService.setValues(memberId, refreshToken, Duration.ofDays(86400000L));
     }
 
     public String getFinalRedirectionUrl(RequiredInfo requiredInfo) {

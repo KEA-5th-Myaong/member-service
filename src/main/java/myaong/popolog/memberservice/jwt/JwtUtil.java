@@ -26,14 +26,14 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Date;
 
+import static myaong.popolog.memberservice.common.Constants.*;
+
 @Component
 @Slf4j
 public class JwtUtil {
-    private static final long ACCESS_EXPIRATION_MS = 60 * 10 * 1 * 1000L;
-    private static final long REFRESH_EXPIRATION_MS = 60 * 60 * 24 * 1 * 1000L;
-    private static final String REISSUE_REDIRECT_URI = "/auth/reissue";
-
     private SecretKey secretKey;
+    @Value("${redirect-url.reissue}")
+    private String reissueUrl;
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
     private final RedisService redisService;
 
@@ -146,7 +146,7 @@ public class JwtUtil {
         HttpSession session = request.getSession();
         session.setAttribute("access", tokenDto.getAccessToken());
         session.setAttribute("refresh", tokenDto.getRefreshToken());
-        response.sendRedirect(REISSUE_REDIRECT_URI);
+        response.sendRedirect(reissueUrl);
     }
 
     // access, refresh 토큰 동시에 재발급
@@ -166,15 +166,15 @@ public class JwtUtil {
 
         // redis에 있는 refresh token 새로운 refresh token으로 대체
         // update refreshToken to Redis
-        redisService.setValues(providerId, tokenDto.getRefreshToken(), Duration.ofMillis(REFRESH_EXPIRATION_MS));
+        redisService.setValues(providerId, tokenDto.getRefreshToken(), Duration.ofMillis(REFRESH_DURATION_MILLIS));
 
         return tokenDto;
     }
 
     // access, refresh Token 생성
     public TokenDTO createAccessAndRefreshToken(Long memberId, String providerId, String permission) {
-        String accessToken = createJwt("access", memberId, providerId, permission, ACCESS_EXPIRATION_MS);
-        String refreshToken = createJwt("refresh", memberId, providerId, permission, REFRESH_EXPIRATION_MS);
+        String accessToken = createJwt(ACCESS_KEY_NAME, memberId, providerId, permission, ACCESS_DURATION_MILLIS);
+        String refreshToken = createJwt(REFRESH_KEY_NAME, memberId, providerId, permission, REFRESH_DURATION_MILLIS);
 
         return TokenDTO.of(accessToken, refreshToken);
     }
