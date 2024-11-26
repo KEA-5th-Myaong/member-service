@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @RedisHash(value = "refresh", timeToLive = 60*60*24*1) // 초 단위 -> 1일
 public class RefreshToken {
 
-    // key값을 providerId로 저장
+    // key값을 memberId로 저장
     @Id
     private String id;
     Collection<? extends GrantedAuthority> authorities;
