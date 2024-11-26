@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
     private final MemberQueryService memberQueryService;
     private final MemberCommandService memberCommandService;
-    private final AuthService authService;
 
     @Operation(summary = "API 명세서 v0.4 line 14", description = "기본 정보 추가 입력, 소셜 회원가입 시 필수 데이터를 불러올 수 없어, 사용자에게 필수 데이터를 요청합니다.")
     @PostMapping
@@ -36,14 +35,14 @@ public class MemberController {
     @Operation(summary = "API 명세서 v0.4 line 16", description = "개인정보 수정 시 비밀번호 일치 확인")
     @PostMapping("/check-password")
     public ApiResponse<Boolean> checkPassword(@RequestHeader("memberId") Long memberId, @RequestBody @Valid MemberRequest.CheckPasswordDTO request) {
-        boolean matches = authService.checkPassword(memberId, request);
+        boolean matches = memberCommandService.checkPassword(memberId, request);
         return ApiResponse.onSuccess(matches);
     }
 
     @Operation(summary = "API 명세서 v0.4 line 17", description = "비밀번호 변경")
     @PutMapping("/password")
     public ApiResponse updatePassword(@RequestHeader("memberId") Long memberId, @RequestBody @Valid MemberRequest.UpdatePasswordDTO request ) {
-        authService.updatePassword(memberId, request);
+        memberCommandService.updatePassword(memberId, request);
         return ApiResponse.onSuccess(null);
     }
 
