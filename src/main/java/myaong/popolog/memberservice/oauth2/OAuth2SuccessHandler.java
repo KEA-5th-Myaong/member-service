@@ -67,7 +67,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String refreshToken = jwtUtil.createJwt("refresh", memberId, providerId, permission, 60*60*24*1*1000L);
 
         // redis에 insert (key = providerId / value = refreshToken)
-        redisService.setValues(providerId, refreshToken, Duration.ofMillis(REFRESH_DURATION_MILLIS));
+        redisService.setValues(String.valueOf(memberId), refreshToken, Duration.ofMillis(REFRESH_DURATION_MILLIS));
 //        saveRefreshTokenOnRedis(providerId, refreshToken, permission);
 
         // 로그인 시도 횟수 초기화
@@ -75,7 +75,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         findMember.initiateCountAttempt();
 
         // 응답
-        // TODO: redirect하면 헤더와 쿠키에 값이 사라지므로 url에 쿼리 파라미터로 전달
+        // TODO: redirect하면 헤더와 쿠키에 값이 사라지므로 토큰을 쿼리 파라미터로 전달
         response.setHeader(AUTHORIZATION_HEADER, AUTH_TYPE + accessToken);
         response.addCookie(cookieUtil.createCookie(REFRESH_KEY_NAME, refreshToken));
         response.setStatus(HttpStatus.OK.value());
