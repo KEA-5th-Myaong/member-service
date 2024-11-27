@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import myaong.popolog.memberservice.common.exception.ApiResponse;
 import myaong.popolog.memberservice.dto.request.MemberRequest;
 import myaong.popolog.memberservice.dto.response.MemberResponse;
-import myaong.popolog.memberservice.service.AuthService;
 import myaong.popolog.memberservice.service.MemberCommandService;
 import myaong.popolog.memberservice.service.MemberQueryService;
 import org.springframework.web.bind.annotation.*;

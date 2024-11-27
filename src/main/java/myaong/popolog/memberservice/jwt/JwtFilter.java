@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import myaong.popolog.memberservice.dto.response.TokenDTO;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -41,9 +40,10 @@ public class JwtFilter extends OncePerRequestFilter {
         // refreshToken이 유효하지 않거나 만료된 경우,
         // 또는 accessToken이 유효하지 않거나 만료된 경우에는 doFilter로 타고 들어가 JwtAccessDeined 핸들러에서 에러 메시지로 응답하도록 동작
 
-        // accessToken 검증(유효하며 만료됐을 때 if문 안으로 들어감)
+        // accessToken 검증(유효한데 만료됐을 때 if문 안으로 들어감)
         if (jwtUtil.isExpired(accessToken) && jwtUtil.validateToken(accessToken)) {
-            String refreshToken = jwtUtil.getTokenFromHeader(request, REFRESH_KEY_NAME);
+            // 쿠키에서 refreshToken 꺼내기
+            String refreshToken = jwtUtil.getTokenFromCookie(request, REFRESH_KEY_NAME);
 
             // refresh token이 유효하고, 만료되지 않았을 때 access, refresh 재발급
             if (jwtUtil.validateToken(refreshToken) && !jwtUtil.isExpired(refreshToken)) {

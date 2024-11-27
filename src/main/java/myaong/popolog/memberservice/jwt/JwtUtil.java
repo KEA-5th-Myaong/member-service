@@ -2,6 +2,7 @@ package myaong.popolog.memberservice.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SecurityException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -41,20 +42,37 @@ public class JwtUtil {
     // 여기서는 HS256으로 진행했다.
     public JwtUtil(@Value("${jwt.secret-key}") String secret,
                    RefreshTokenRedisRepository refreshTokenRedisRepository,
-                   RedisService redisService) {
+                   RedisService redisService,
+                   @Value("${redirect-url.reissue}") String reissueUrl) {
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
         this.refreshTokenRedisRepository = refreshTokenRedisRepository;
         this.redisService = redisService;
+        this.reissueUrl = reissueUrl;
     }
 
-    public String getTokenFromHeader(HttpServletRequest request, String headerName) {
-        String token = request.getHeader(headerName);
+    public String getTokenFromHeader(HttpServletRequest request, String name) {
+        String token = request.getHeader(name);
         log.info("token from header: {}", token);
+
+        // 토큰에 값이 존재하는 경우
         if (token != null && !token.isEmpty()) {
-            // Bearer 제거 <- oAuth2를 이용했다고 명시적으로 붙여주는 타입인데 JWT를 검증하거나 정보를 추출 시 제거해줘야한다.
-            return token.substring(7);
+            return token.substring(7); // access token은 Bearer 제거
         }
+
         return null; // 토큰이 없거나 비어있을 경우 null 반환
+    }
+
+    public String getTokenFromCookie(HttpServletRequest request, String name) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (name.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null; // 쿠키가 없거나 값이 없을 경우 null 반환
     }
 
     // accessToken인지 refreshToken인지 확인
@@ -63,7 +81,7 @@ public class JwtUtil {
                 .setSigningKey(secretKey)
                 .parseClaimsJws(token)
                 .getBody()
-                .get("category", String.class);
+                .get("tokenType", String.class);
     }
 
     // memberId 추출
@@ -144,29 +162,26 @@ public class JwtUtil {
     public void redirectReissueURI(HttpServletRequest request, HttpServletResponse response, TokenDTO tokenDto)
             throws IOException {
         HttpSession session = request.getSession();
-        session.setAttribute("access", tokenDto.getAccessToken());
-        session.setAttribute("refresh", tokenDto.getRefreshToken());
+        session.setAttribute(ACCESS_KEY_NAME, tokenDto.getAccessToken());
+        session.setAttribute(REFRESH_KEY_NAME, tokenDto.getRefreshToken());
         response.sendRedirect(reissueUrl);
     }
 
     // access, refresh 토큰 동시에 재발급
     @Transactional
     public TokenDTO reissueAccessToken(String refreshToken) {
-        RefreshToken findRefreshToken = refreshTokenRedisRepository.findByRefreshToken(refreshToken);
+        String providerId = getProviderId(refreshToken);
+        Long memberId = getMemberId(refreshToken);
+        String permission = getPermission(refreshToken);
 
-        String providerId = getProviderId(findRefreshToken.getRefreshToken());
-        Long memberId = getMemberId(findRefreshToken.getRefreshToken());
+        // 기존의 refresh token 삭제
+        redisService.deleteValues(String.valueOf(memberId));
 
-        TokenDTO tokenDto = createAccessAndRefreshToken(memberId, providerId, findRefreshToken.getAuthority());
-//        refreshTokenRedisRepository.save(RefreshToken.builder()
-//                .id(findRefreshToken.getId())
-//                .authorities(findRefreshToken.getAuthorities())
-//                .refreshToken(tokenDto.getRefreshToken())
-//                .build());
+        TokenDTO tokenDto = createAccessAndRefreshToken(memberId, providerId, permission);
 
         // redis에 있는 refresh token 새로운 refresh token으로 대체
         // update refreshToken to Redis
-        redisService.setValues(providerId, tokenDto.getRefreshToken(), Duration.ofMillis(REFRESH_DURATION_MILLIS));
+        redisService.setValues(String.valueOf(memberId), tokenDto.getRefreshToken(), Duration.ofMillis(REFRESH_DURATION_MILLIS));
 
         return tokenDto;
     }

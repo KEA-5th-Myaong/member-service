@@ -19,6 +19,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -44,6 +45,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     @Value("${redirect-url.main}")
     private String mainPageUrl;
+
     @Value("${redirect-url.profile-form}")
     private String profileFormUrl;
     
@@ -68,50 +70,49 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         // redis에 insert (key = memberId / value = refreshToken)
         redisService.setValues(String.valueOf(memberId), refreshToken, Duration.ofMillis(REFRESH_DURATION_MILLIS));
-//        saveRefreshTokenOnRedis(providerId, refreshToken, permission);
+//        saveRefreshTokenOnRedis(String.valueOf(memberId), refreshToken, permission);
 
         // 로그인 시도 횟수 초기화
         Member findMember = memberQueryService.findMemberByMemberId(memberId);
         findMember.initiateCountAttempt();
 
-        // 응답
-        // TODO: redirect하면 헤더와 쿠키에 값이 사라지므로 토큰을 쿼리 파라미터로 전달
-        response.setHeader(AUTHORIZATION_HEADER, AUTH_TYPE + accessToken);
-        response.addCookie(cookieUtil.createCookie(REFRESH_KEY_NAME, refreshToken));
-        response.setStatus(HttpStatus.OK.value());
-
         log.info("accessToken: {}", accessToken);
         log.info("refreshToken: {}", refreshToken);
 
         // 신규 회원인지 아닌지에 따라 redirect할 url이 달라짐.
-        String finalRedirectionUrl = getFinalRedirectionUrl(findMember.getRequiredInfo());
+        String redirectionUrl = getRedirectionUrl(findMember.getRequiredInfo());
 
+        // 리다이렉션 URL 생성
+        String finalRedirectionUrl = UriComponentsBuilder.fromUriString(redirectionUrl)
+                .queryParam(ACCESS_KEY_NAME, accessToken)
+                .queryParam(REFRESH_KEY_NAME, refreshToken)
+                .build().toUriString();
+
+        response.setStatus(HttpStatus.OK.value());
         response.sendRedirect(finalRedirectionUrl);     // 로그인 성공시 프론트에 알려줄 redirect 경로
     }
 
 
-    private void saveRefreshTokenOnRedis(String providerId, String refreshToken, String permission) {
+    private void saveRefreshTokenOnRedis(String memberId, String refreshToken, String permission) {
         List<SimpleGrantedAuthority> simpleGrantedAuthorities = new ArrayList<>();
         simpleGrantedAuthorities.add(new SimpleGrantedAuthority(permission));
 
         refreshTokenRedisRepository.save(RefreshToken.builder()
-                .id(providerId)
+                .id(memberId)
                 .authorities(simpleGrantedAuthorities)
                 .refreshToken(refreshToken)
                 .build());
 
-//        redisService.setValues(memberId, refreshToken, Duration.ofDays(86400000L));
+        redisService.setValues(memberId, refreshToken, Duration.ofDays(REFRESH_DURATION_MILLIS));
     }
 
-    public String getFinalRedirectionUrl(RequiredInfo requiredInfo) {
-        String finalRedirectionUrl = switch (requiredInfo) {
+    public String getRedirectionUrl(RequiredInfo requiredInfo) {
+        return switch (requiredInfo) {
             case BOTH -> profileFormUrl; // 프로필과 관심직군 둘 다 입력 필요
             case PREJOBS -> mainPageUrl; // 관심직군 입력 필요
             case COMPLETED -> mainPageUrl; // 둘 다 입력 완료
             default -> mainPageUrl; // 기본 URL
         };
-
-        return finalRedirectionUrl;
     }
     
 }

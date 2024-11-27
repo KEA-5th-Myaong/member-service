@@ -5,10 +5,10 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import myaong.popolog.memberservice.entity.Member;
 import myaong.popolog.memberservice.service.RedisService;
+import myaong.popolog.memberservice.util.CookieUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,7 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.stereotype.Component;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.BufferedReader;
@@ -35,15 +34,16 @@ import static myaong.popolog.memberservice.common.Constants.*;
 public class NormalLoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final CookieUtil cookieUtil;
     private final RedisService redisService;
 
     @Value("${redirect-url.main}")
     private String mainPageUrl;
 
-    public NormalLoginFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, RedisService redisService, String mainPageUrl) {
-//        super(); // UsernamePasswordAuthenticationFilter의 생성자 호출
+    public NormalLoginFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, CookieUtil cookieUtil, RedisService redisService, String mainPageUrl) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.cookieUtil = cookieUtil;
         this.redisService = redisService;
         this.mainPageUrl = mainPageUrl;
 
@@ -93,7 +93,6 @@ public class NormalLoginFilter extends UsernamePasswordAuthenticationFilter {
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
         GrantedAuthority auth = iterator.next();
-
         String permission = auth.getAuthority();
 
         // accessToken과 refreshToken 생성
@@ -114,13 +113,38 @@ public class NormalLoginFilter extends UsernamePasswordAuthenticationFilter {
                 .queryParam(REFRESH_KEY_NAME, refreshToken)
                 .build().toUriString();
 
+        response.setHeader(AUTHORIZATION_HEADER, AUTH_TYPE + accessToken);
+        response.addCookie(cookieUtil.createCookie(REFRESH_KEY_NAME, refreshToken));
         response.setStatus(HttpStatus.OK.value());
+
         response.sendRedirect(finalRedirectionUrl);
     }
 
     // 로그인 실패
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-        response.setStatus(401);
+        apiResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "MEMBER_4013", "일치하는 회원 정보가 없습니다. 아이디 혹은 비밀번호를 다시 확인해주세요.", false);
+    }
+
+    private static void apiResponse(HttpServletResponse response, int sc, String code, String message, boolean success) throws IOException {
+        // HTTP 상태 코드 설정
+        response.setStatus(sc); // 상태 코드
+
+        // JSON 응답 작성
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        // 에러 메시지 객체 생성
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("code", code);
+        responseMap.put("message", message);
+        responseMap.put("success", success);
+
+        // ObjectMapper를 사용하여 Map을 JSON으로 변환
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonResponse = objectMapper.writeValueAsString(responseMap);
+
+        // 응답에 JSON 문자열 쓰기
+        response.getWriter().write(jsonResponse);
     }
 }

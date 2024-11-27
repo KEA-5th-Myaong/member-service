@@ -24,6 +24,7 @@ public enum ApiCode {
 	INCORRECT_ID(HttpStatus.UNAUTHORIZED, "MEMBER_4010", "아이디가 맞지 않습니다. 다시 시도해주세요."),
 	INCORRECT_PASSWORD(HttpStatus.UNAUTHORIZED, "MEMBER_4011", "비밀번호가 맞지 않습니다. 다시 시도해주세요."),	// 재시도 횟수를 함께 전송
 	UNAUTHENTICATED(HttpStatus.UNAUTHORIZED, "MEMBER_4012", "로그인이 필요한 요청입니다."),
+	FAILED_LOGIN(HttpStatus.UNAUTHORIZED, "MEMBER_4013", "일치하는 회원 정보가 없습니다. 아이디 혹은 비밀번호를 다시 확인해주세요."),
 
 	ACCESS_DENIED(HttpStatus.NOT_FOUND, "MEMBER_4030", "접근 불가능한 권한입니다."),
 

@@ -12,7 +12,6 @@ import myaong.popolog.memberservice.common.annotation.EmailFormat;
 import myaong.popolog.memberservice.common.annotation.LoginIdFormat;
 import myaong.popolog.memberservice.common.exception.ApiResponse;
 import myaong.popolog.memberservice.dto.request.AuthRequest;
-import myaong.popolog.memberservice.dto.request.MemberRequest;
 import myaong.popolog.memberservice.jwt.JwtUtil;
 import myaong.popolog.memberservice.service.AuthService;
 import myaong.popolog.memberservice.service.MemberQueryService;
@@ -26,6 +25,8 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
+
+import static myaong.popolog.memberservice.common.Constants.*;
 
 @Slf4j
 @RestController
@@ -50,8 +51,8 @@ public class AuthController {
     @GetMapping("/reissue")
     public void reissueToken(HttpServletRequest request, HttpServletResponse response) {
         HttpSession session = request.getSession();
-        String accessToken = (String) session.getAttribute("access");
-        String refreshToken = (String) session.getAttribute("refresh");
+        String accessToken = (String) session.getAttribute(ACCESS_KEY_NAME);
+        String refreshToken = (String) session.getAttribute(REFRESH_KEY_NAME);
 
         response.setHeader(AUTHORIZATION_HEADER, AUTH_TYPE + accessToken);
         response.addCookie(cookieUtil.createCookie(REFRESH_KEY_NAME, refreshToken));
