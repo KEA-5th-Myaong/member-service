@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import myaong.popolog.memberservice.common.exception.ApiCode;
 import myaong.popolog.memberservice.entity.Member;
 import myaong.popolog.memberservice.service.RedisService;
 import myaong.popolog.memberservice.util.CookieUtil;
@@ -123,7 +124,7 @@ public class NormalLoginFilter extends UsernamePasswordAuthenticationFilter {
     // 로그인 실패
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-        apiResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "MEMBER_4013", "일치하는 회원 정보가 없습니다. 아이디 혹은 비밀번호를 다시 확인해주세요.", false);
+        apiResponse(response, HttpServletResponse.SC_UNAUTHORIZED, ApiCode.FAILED_LOGIN.getCode(), ApiCode.FAILED_LOGIN.getMessage(), false);
     }
 
     private static void apiResponse(HttpServletResponse response, int sc, String code, String message, boolean success) throws IOException {
