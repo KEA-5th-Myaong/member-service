@@ -30,8 +30,7 @@ import java.util.Map;
 
 import static myaong.popolog.memberservice.common.Constants.*;
 
-//@RequiredArgsConstructor
-//@Component // NormalLoginFilter는 스프링 빈으로 관리하지 않음
+// NormalLoginFilter는 스프링 빈으로 관리하지 않을 것이므로 @Component 사용 X
 @Slf4j
 public class NormalLoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
@@ -114,9 +113,6 @@ public class NormalLoginFilter extends UsernamePasswordAuthenticationFilter {
                 .queryParam(ACCESS_KEY_NAME, accessToken)
                 .queryParam(REFRESH_KEY_NAME, refreshToken)
                 .build().toUriString();
-
-        log.info("mainPageUrl: {}", mainPageUrl);
-        log.info("finalRedirectionUrl: {}", finalRedirectionUrl);
 
         response.setStatus(HttpStatus.OK.value());
         response.sendRedirect(finalRedirectionUrl);

@@ -15,7 +15,7 @@ import java.io.IOException;
 
 import static myaong.popolog.memberservice.common.Constants.*;
 
-//@Component // JwtFilter는 스프링 빈으로 관리하지 않음
+// JwtFilter는 스프링 빈으로 관리하지 않을 것이므로 @Component 사용 X
 @RequiredArgsConstructor
 @Slf4j
 public class JwtFilter extends OncePerRequestFilter {
