@@ -79,7 +79,8 @@ public class AuthController {
         try {
             response.sendRedirect(loginPageUrl);
         } catch (IOException e) {
-            log.info("redirect failed", e);
+            log.info("redirect failed");
+            e.printStackTrace();
         }
     }
 

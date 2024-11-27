@@ -13,13 +13,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-@Component
+import static myaong.popolog.memberservice.common.Constants.*;
+
+//@Component // JwtFilter는 스프링 빈으로 관리하지 않음
 @RequiredArgsConstructor
 @Slf4j
 public class JwtFilter extends OncePerRequestFilter {
-    private static final String AUTHORIZATION_HEADER_NAME = "Authorization";
-    private static final String REFRESH_KEY_NAME = "refresh";
-
     private final JwtUtil jwtUtil;
     private final RequestMatcherHolder requestMatcherHolder;
 
@@ -32,7 +31,7 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // 요청 헤더에 있는 access라는 값을 가져오자 이게 accessToken이다.
-        String accessToken = jwtUtil.getTokenFromHeader(request, AUTHORIZATION_HEADER_NAME);
+        String accessToken = jwtUtil.getTokenFromHeader(request, AUTHORIZATION_HEADER);
 
         // 유효한 토큰(유효성 검사 통과, 만료되지 않은 토큰)이면 SecurityContext에 인증 정보 저장
         if (jwtUtil.validateToken(accessToken) && !jwtUtil.isExpired(accessToken)) {

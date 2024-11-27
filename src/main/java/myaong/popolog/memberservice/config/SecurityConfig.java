@@ -1,10 +1,11 @@
 package myaong.popolog.memberservice.config;
 
 import lombok.RequiredArgsConstructor;
-import myaong.popolog.memberservice.enums.Permission;
 import myaong.popolog.memberservice.jwt.*;
 import myaong.popolog.memberservice.oauth2.OAuth2SuccessHandler;
 import myaong.popolog.memberservice.oauth2.service.CustomOAuth2UserService;
+import myaong.popolog.memberservice.service.RedisService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,8 +13,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -31,20 +30,22 @@ public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
-    private final JwtFilter jwtFilter;
+    private final JwtUtil jwtUtil;
+    private final RedisService redisService;
 //    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 //    private final JwtAuthenticationFailEntryPoint jwtAuthenticationFailEntryPoint;
     private final RequestMatcherHolder requestMatcherHolder;
+
+    //AuthenticationManager가 인자로 받을 AuthenticationConfiguraion 객체 생성자 주입
+    private final AuthenticationConfiguration authenticationConfiguration;
+
+    @Value("${redirect-url.main}")
+    private String mainPageUrl;
 
     //AuthenticationManager Bean 등록
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -69,7 +70,8 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler(oAuth2SuccessHandler)
                 )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // 기존 시큐리티의 UsernamePasswordAuthenticationFilter를 커스텀한 JwtFilter로 대체
+                .addFilterAt(new JwtFilter(jwtUtil, requestMatcherHolder), NormalLoginFilter.class) // JwtFilter를 NormalLoginFilter 앞에 추가하여 JWT 검증을 수행
+                .addFilterAt(new NormalLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, redisService, mainPageUrl), UsernamePasswordAuthenticationFilter.class); // NormalLoginFilter를 UsernamePasswordAuthenticationFilter 앞에 추가하여 로그인 요청을 처리
 //                .exceptionHandling(exceptionHandling -> {
 //                    exceptionHandling.authenticationEntryPoint(jwtAuthenticationFailEntryPoint);
 //                    exceptionHandling.accessDeniedHandler(jwtAccessDeniedHandler);
