@@ -54,7 +54,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(corsCustomizer -> corsCustomizer.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
@@ -82,21 +81,4 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*")); // 해당 출처에서 요청 허용 (http://localhost:3000와 같이 주소로 허용가능)
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("*")); // 모든 HTTP 헤더의 요청을 허용합니다.
-        configuration.setExposedHeaders(Arrays.asList("Authorization", "Set-Cookie")); // 브라우저가 접근할 수 있도록 특정 응답 헤더를 노출합니다. 여기서는 "Set-Cookie"와 "Authorization"
-        configuration.setAllowCredentials(true); // 인증 정보(쿠키, 인증 토큰 등)의 전송을 허용합니다.
-        configuration.setMaxAge(3600L); // 최대 유효시간 설정
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-
-        return source;
-    }
-
 }
