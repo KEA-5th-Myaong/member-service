@@ -6,7 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import myaong.popolog.memberservice.dto.response.TokenDTO;
+import myaong.popolog.memberservice.common.exception.ApiCode;
+import myaong.popolog.memberservice.common.exception.ApiResponse;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -29,31 +30,23 @@ public class JwtFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        // 요청 헤더에 있는 access라는 값을 가져오자 이게 accessToken이다.
         String accessToken = jwtUtil.getTokenFromHeader(request, AUTHORIZATION_HEADER);
+        String refreshToken = jwtUtil.getTokenFromCookie(request, REFRESH_KEY_NAME);
 
         // 유효한 토큰(유효성 검사 통과, 만료되지 않은 토큰)이면 SecurityContext에 인증 정보 저장
         if (jwtUtil.validateToken(accessToken) && !jwtUtil.isExpired(accessToken)) {
             SecurityContextHolder.getContext().setAuthentication(jwtUtil.getAuthentication(accessToken));
         }
 
-        // refreshToken이 유효하지 않거나 만료된 경우,
-        // 또는 accessToken이 유효하지 않거나 만료된 경우에는 doFilter로 타고 들어가 JwtAccessDeined 핸들러에서 에러 메시지로 응답하도록 동작
-
-        // accessToken 검증(유효한데 만료됐을 때 if문 안으로 들어감)
+        // 만료됐으면 재발급
         if (jwtUtil.isExpired(accessToken) && jwtUtil.validateToken(accessToken)) {
-            // 쿠키에서 refreshToken 꺼내기
-            String refreshToken = jwtUtil.getTokenFromCookie(request, REFRESH_KEY_NAME);
-
-            // refresh token이 유효하고, 만료되지 않았을 때 access, refresh 재발급
             if (jwtUtil.validateToken(refreshToken) && !jwtUtil.isExpired(refreshToken)) {
-                // accessToken, refreshToken 재발급
-                TokenDTO tokenDTO = jwtUtil.reissueAccessToken(refreshToken);
-                SecurityContextHolder.getContext()
-                        .setAuthentication(jwtUtil.getAuthentication(tokenDTO.getAccessToken()));
-
-                jwtUtil.redirectReissueURI(request, response, tokenDTO);
+                jwtUtil.redirectReissueURI(response, refreshToken);
             }
+        }
+
+        if (!jwtUtil.validateToken(accessToken) || !jwtUtil.validateToken(refreshToken)) {
+            ApiResponse.responseErrorOnFilter(response, HttpServletResponse.SC_UNAUTHORIZED, ApiCode.INVALID_TOKEN.getCode(), ApiCode.INVALID_TOKEN.getMessage());
         }
 
         filterChain.doFilter(request, response);

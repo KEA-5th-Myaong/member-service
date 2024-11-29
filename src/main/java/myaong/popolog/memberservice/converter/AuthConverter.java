@@ -1,6 +1,7 @@
 package myaong.popolog.memberservice.converter;
 
 import myaong.popolog.memberservice.dto.request.AuthRequest;
+import myaong.popolog.memberservice.dto.response.AuthResponse;
 import myaong.popolog.memberservice.entity.Member;
 import myaong.popolog.memberservice.enums.Permission;
 import myaong.popolog.memberservice.enums.RequiredInfo;
@@ -53,6 +54,26 @@ public class AuthConverter {
                 .requiredInfo(RequiredInfo.PREJOBS)
                 .build();
 
+    }
+
+    public static AuthResponse.LoginDTO toLoginDTO(String accessToken, RequiredInfo requiredInfo) {
+        return AuthResponse.LoginDTO.builder()
+                .accessToken(accessToken)
+                .requiredInfo(requiredInfo)
+                .build();
+    }
+
+    public static AuthResponse.TokenDTO toTokenDTO(String accessToken, String refreshToken) {
+        return AuthResponse.TokenDTO.builder()
+               .accessToken(accessToken)
+               .refreshToken(refreshToken)
+               .build();
+    }
+
+    public static AuthResponse.ReissueDTO toReissueDTO(String accessToken) {
+        return AuthResponse.ReissueDTO.builder()
+               .accessToken(accessToken)
+               .build();
     }
 
 }

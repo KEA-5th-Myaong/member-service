@@ -7,6 +7,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import myaong.popolog.memberservice.common.exception.ApiCode;
+import myaong.popolog.memberservice.common.exception.ApiResponse;
+import myaong.popolog.memberservice.converter.AuthConverter;
+import myaong.popolog.memberservice.dto.response.AuthResponse;
 import myaong.popolog.memberservice.entity.Member;
 import myaong.popolog.memberservice.service.RedisService;
 import myaong.popolog.memberservice.util.CookieUtil;
@@ -38,15 +41,11 @@ public class NormalLoginFilter extends UsernamePasswordAuthenticationFilter {
     private final CookieUtil cookieUtil;
     private final RedisService redisService;
 
-    @Value("${redirect-url.main}")
-    private String mainPageUrl;
-
-    public NormalLoginFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, CookieUtil cookieUtil, RedisService redisService, String mainPageUrl) {
+    public NormalLoginFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, CookieUtil cookieUtil, RedisService redisService) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.cookieUtil = cookieUtil;
         this.redisService = redisService;
-        this.mainPageUrl = mainPageUrl;
 
         setFilterProcessesUrl("/auth/login"); // 일반 로그인 경로 /auth/login으로 변경
     }
@@ -97,8 +96,8 @@ public class NormalLoginFilter extends UsernamePasswordAuthenticationFilter {
         String permission = auth.getAuthority();
 
         // accessToken과 refreshToken 생성
-        String accessToken = jwtUtil.createJwt(ACCESS_KEY_NAME, memberId, null, permission, 60*60*12*1000L); // 초 * 분 * 시 * msec
-        String refreshToken = jwtUtil.createJwt(REFRESH_KEY_NAME, memberId, null, permission, 60*60*24*1*1000L);
+        String accessToken = jwtUtil.createJwt(ACCESS_KEY_NAME, memberId, null, permission, ACCESS_DURATION_MILLIS); // 초 * 분 * 시 * msec
+        String refreshToken = jwtUtil.createJwt(REFRESH_KEY_NAME, memberId, null, permission, REFRESH_DURATION_MILLIS);
 
         // redis에 insert (key = memberId / value = refreshToken)
         redisService.setValues(String.valueOf(memberId), refreshToken, Duration.ofMillis(REFRESH_DURATION_MILLIS));
@@ -109,43 +108,15 @@ public class NormalLoginFilter extends UsernamePasswordAuthenticationFilter {
         log.info("accessToken: {}", accessToken);
         log.info("refreshToken: {}", refreshToken);
 
-        String finalRedirectionUrl = UriComponentsBuilder.fromUriString(mainPageUrl)
-                .queryParam(ACCESS_KEY_NAME, accessToken)
-                .queryParam(REFRESH_KEY_NAME, refreshToken)
-                .build().toUriString();
-
-        response.setHeader(AUTHORIZATION_HEADER, AUTH_TYPE + accessToken);
+        AuthResponse.LoginDTO loginDTO = AuthConverter.toLoginDTO(AUTH_TYPE + accessToken, member.getRequiredInfo());
         response.addCookie(cookieUtil.createCookie(REFRESH_KEY_NAME, refreshToken));
-        response.setStatus(HttpStatus.OK.value());
 
-        response.sendRedirect(finalRedirectionUrl);
+        ApiResponse.responseSuccessOnFilter(response, ApiCode.OK.getCode(), ApiCode.OK.getMessage(), loginDTO);
     }
 
     // 로그인 실패
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-        apiResponse(response, HttpServletResponse.SC_UNAUTHORIZED, ApiCode.FAILED_LOGIN.getCode(), ApiCode.FAILED_LOGIN.getMessage(), false);
-    }
-
-    private static void apiResponse(HttpServletResponse response, int sc, String code, String message, boolean success) throws IOException {
-        // HTTP 상태 코드 설정
-        response.setStatus(sc); // 상태 코드
-
-        // JSON 응답 작성
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-
-        // 에러 메시지 객체 생성
-        Map<String, Object> responseMap = new HashMap<>();
-        responseMap.put("code", code);
-        responseMap.put("message", message);
-        responseMap.put("success", success);
-
-        // ObjectMapper를 사용하여 Map을 JSON으로 변환
-        ObjectMapper objectMapper = new ObjectMapper();
-        String jsonResponse = objectMapper.writeValueAsString(responseMap);
-
-        // 응답에 JSON 문자열 쓰기
-        response.getWriter().write(jsonResponse);
+        ApiResponse.responseErrorOnFilter(response, HttpServletResponse.SC_UNAUTHORIZED, ApiCode.FAILED_LOGIN.getCode(), ApiCode.FAILED_LOGIN.getMessage());
     }
 }

@@ -1,7 +1,13 @@
 package myaong.popolog.memberservice.common.exception;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Getter;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @Getter
 public class ApiResponse<T> {
@@ -37,5 +43,41 @@ public class ApiResponse<T> {
 	// handleExceptionInternal override에서 사용
 	public static <T> ApiResponse<T> onFailure(int code, String message) {
 		return new ApiResponse<>(false, "COMMON_"+code+"0", message, null);
+	}
+
+	// filter에서 사용
+	public static void responseErrorOnFilter(HttpServletResponse response, int sc, String code, String message) throws IOException {
+		response.setStatus(sc);
+
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+
+		Map<String, Object> responseMap = new HashMap<>();
+		responseMap.put("code", code);
+		responseMap.put("message", message);
+		responseMap.put("success", false);
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		String jsonResponse = objectMapper.writeValueAsString(responseMap);
+
+		response.getWriter().write(jsonResponse);
+	}
+
+	public static void responseSuccessOnFilter(HttpServletResponse response, String code, String message, Object data) throws IOException {
+		response.setStatus(HttpServletResponse.SC_OK);
+
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+
+		Map<String, Object> responseMap = new HashMap<>();
+		responseMap.put("code", code);
+		responseMap.put("message", message);
+		responseMap.put("success", true);
+		responseMap.put("data", data); // data 파라미터 추가
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		String jsonResponse = objectMapper.writeValueAsString(responseMap);
+
+		response.getWriter().write(jsonResponse);
 	}
 }

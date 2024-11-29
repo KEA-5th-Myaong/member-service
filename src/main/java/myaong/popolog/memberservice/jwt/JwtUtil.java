@@ -5,15 +5,14 @@ import io.jsonwebtoken.security.SecurityException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import myaong.popolog.memberservice.converter.AuthConverter;
-import myaong.popolog.memberservice.dto.response.TokenDTO;
-import myaong.popolog.memberservice.entity.RefreshToken;
+import myaong.popolog.memberservice.dto.response.AuthResponse;
 import myaong.popolog.memberservice.oauth2.CustomOAuth2User;
 import myaong.popolog.memberservice.oauth2.dto.OAuthUserDTO;
 import myaong.popolog.memberservice.repository.RefreshTokenRedisRepository;
 import myaong.popolog.memberservice.service.RedisService;
+import myaong.popolog.memberservice.util.CookieUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -32,8 +31,8 @@ import static myaong.popolog.memberservice.common.Constants.*;
 @Component
 @Slf4j
 public class JwtUtil {
+    private final CookieUtil cookieUtil;
     private SecretKey secretKey;
-    @Value("${redirect-url.reissue}")
     private String reissueUrl;
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
     private final RedisService redisService;
@@ -41,13 +40,14 @@ public class JwtUtil {
     // application.yml에 있는 평문 secret key를 가져와 초기화하였다.
     // 여기서는 HS256으로 진행했다.
     public JwtUtil(@Value("${jwt.secret-key}") String secret,
+                   @Value("${redirect-url.reissue}") String reissueUrl,
                    RefreshTokenRedisRepository refreshTokenRedisRepository,
-                   RedisService redisService,
-                   @Value("${redirect-url.reissue}") String reissueUrl) {
+                   RedisService redisService, CookieUtil cookieUtil) {
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
+        this.reissueUrl = reissueUrl;
         this.refreshTokenRedisRepository = refreshTokenRedisRepository;
         this.redisService = redisService;
-        this.reissueUrl = reissueUrl;
+        this.cookieUtil = cookieUtil;
     }
 
     public String getTokenFromHeader(HttpServletRequest request, String name) {
@@ -128,12 +128,25 @@ public class JwtUtil {
     // 현재 날짜와 만료 날짜를 비교하여,
     // 만료 날짜가 현재 날짜보다 이전(만료O)이면 true를 반환하고, 그렇지 않으면 false(만료X)를 반환
     public Boolean isExpired(String token) {
-        Date expiration = Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
-        return expiration.before(new Date());
+        try {
+            Date expiration = Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getExpiration();
+
+            expiration.before(new Date());
+            return false;
+        } catch (MalformedJwtException e) {
+            log.info("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
+            return false;
+        } catch (IllegalArgumentException e) {
+            log.info("JWT is null, 토큰이 존재하지 않습니다.");
+            return false;
+        } catch (ExpiredJwtException e) {
+            log.info("Expired JWT token, 만료된 JWT token 입니다.");
+            return true;
+        }
     }
 
     // token 유효성 검사
@@ -155,21 +168,13 @@ public class JwtUtil {
             return false;
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT token, 만료된 JWT token 입니다.");
-            return true;
+            return true; // 만료된 토큰은 유효하다고 판단한 후 isExpired 메서드로 만료여부 재확인
         }
-    }
-
-    public void redirectReissueURI(HttpServletRequest request, HttpServletResponse response, TokenDTO tokenDto)
-            throws IOException {
-        HttpSession session = request.getSession();
-        session.setAttribute(ACCESS_KEY_NAME, tokenDto.getAccessToken());
-        session.setAttribute(REFRESH_KEY_NAME, tokenDto.getRefreshToken());
-        response.sendRedirect(reissueUrl);
     }
 
     // access, refresh 토큰 동시에 재발급
     @Transactional
-    public TokenDTO reissueAccessToken(String refreshToken) {
+    public AuthResponse.TokenDTO reissueToken(String refreshToken) {
         String providerId = getProviderId(refreshToken);
         Long memberId = getMemberId(refreshToken);
         String permission = getPermission(refreshToken);
@@ -177,7 +182,7 @@ public class JwtUtil {
         // 기존의 refresh token 삭제
         redisService.deleteValues(String.valueOf(memberId));
 
-        TokenDTO tokenDto = createAccessAndRefreshToken(memberId, providerId, permission);
+        AuthResponse.TokenDTO tokenDto = createAccessAndRefreshToken(memberId, providerId, permission);
 
         // redis에 있는 refresh token 새로운 refresh token으로 대체
         // update refreshToken to Redis
@@ -186,12 +191,20 @@ public class JwtUtil {
         return tokenDto;
     }
 
+    public void redirectReissueURI(HttpServletResponse response, String refreshToken)
+            throws IOException {
+        Cookie cookie = cookieUtil.createCookie(REFRESH_KEY_NAME, refreshToken);
+
+        response.addCookie(cookie);
+        response.sendRedirect(reissueUrl);
+    }
+
     // access, refresh Token 생성
-    public TokenDTO createAccessAndRefreshToken(Long memberId, String providerId, String permission) {
+    public AuthResponse.TokenDTO createAccessAndRefreshToken(Long memberId, String providerId, String permission) {
         String accessToken = createJwt(ACCESS_KEY_NAME, memberId, providerId, permission, ACCESS_DURATION_MILLIS);
         String refreshToken = createJwt(REFRESH_KEY_NAME, memberId, providerId, permission, REFRESH_DURATION_MILLIS);
 
-        return TokenDTO.of(accessToken, refreshToken);
+        return AuthConverter.toTokenDTO(accessToken, refreshToken);
     }
 
     // JWT 발급

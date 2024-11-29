@@ -10,6 +10,7 @@ public enum ApiCode {
 
 	OK(HttpStatus.OK, "COMMON_2000", "OK"),
 	INVALID_DATA(HttpStatus.BAD_REQUEST, "COMMON_4000", "Request data missing or invalid"),
+	INVALID_TOKEN(HttpStatus.BAD_REQUEST, "COMMON_4010", "Invalid or expired token"),
 	FORBIDDEN(HttpStatus.FORBIDDEN, "COMMON_4030", "Forbidden"),
 	METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "COMMON_4050", "Method not allowed"),
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "COMMON_5000", "Internal Server Error"),
