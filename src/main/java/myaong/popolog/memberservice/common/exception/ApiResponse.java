@@ -52,12 +52,10 @@ public class ApiResponse<T> {
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 
-		Map<String, Object> responseMap = new HashMap<>();
-		responseMap.put("code", code);
-		responseMap.put("message", message);
-		responseMap.put("success", false);
+		ApiResponse responseMap = new ApiResponse<>(false, code, message, null);
 
 		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 		String jsonResponse = objectMapper.writeValueAsString(responseMap);
 
 		response.getWriter().write(jsonResponse);
@@ -69,13 +67,10 @@ public class ApiResponse<T> {
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 
-		Map<String, Object> responseMap = new HashMap<>();
-		responseMap.put("code", code);
-		responseMap.put("message", message);
-		responseMap.put("success", true);
-		responseMap.put("data", data); // data 파라미터 추가
+		ApiResponse responseMap = new ApiResponse<>(true, code, message, data);
 
 		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 		String jsonResponse = objectMapper.writeValueAsString(responseMap);
 
 		response.getWriter().write(jsonResponse);
