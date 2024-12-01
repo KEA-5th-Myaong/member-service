@@ -13,7 +13,7 @@ import java.util.List;
 
 @Configuration
 @OpenAPIDefinition(
-        info = @Info(title = "Popolog Member Service API Document", description = "Popolog Member Service 명세서", version = "v0.3")
+        info = @Info(title = "Popolog Member Service API Document", description = "Popolog Member Service 명세서", version = "v0.4")
 )
 @SecurityScheme(
         name = "Bearer Token",

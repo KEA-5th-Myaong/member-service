@@ -58,7 +58,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         // 존재하지 않는 member면 회원정보를 저장하고 CustomOAuth2User 반환
         if (findMember == null) {
             // member 저장
-            Member newMember = AuthConverter.toMember(oAuth2Response, RequiredInfo.BOTH);
+            Member newMember = AuthConverter.toOAuthMember(oAuth2Response, RequiredInfo.BOTH);
             Member savedMember = memberCommandService.saveMember(newMember);
 
             OAuthUserDTO oAuthUserDTO = AuthConverter.toOAuthUserDTO(oAuth2Response.getName(), savedMember.getId(), providerId, Permission.MEMBER.name());

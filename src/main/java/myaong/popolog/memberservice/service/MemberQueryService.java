@@ -12,4 +12,6 @@ public interface MemberQueryService {
     Member findMemberByUsername(String username);
     Member findByProviderId(String providerId);
     String findPasswordById(Long memberId);
+    boolean existsMemberByUsername(String username);
+    boolean existsMemberByEmail(String email);
 }

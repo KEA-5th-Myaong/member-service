@@ -2,17 +2,17 @@ package myaong.popolog.memberservice.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SecurityException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import myaong.popolog.memberservice.converter.AuthConverter;
-import myaong.popolog.memberservice.dto.response.TokenDTO;
-import myaong.popolog.memberservice.entity.RefreshToken;
+import myaong.popolog.memberservice.dto.response.AuthResponse;
 import myaong.popolog.memberservice.oauth2.CustomOAuth2User;
 import myaong.popolog.memberservice.oauth2.dto.OAuthUserDTO;
 import myaong.popolog.memberservice.repository.RefreshTokenRedisRepository;
 import myaong.popolog.memberservice.service.RedisService;
+import myaong.popolog.memberservice.util.CookieUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,35 +26,53 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Date;
 
+import static myaong.popolog.memberservice.common.Constants.*;
+
 @Component
 @Slf4j
 public class JwtUtil {
-    private static final long ACCESS_EXPIRATION_MS = 60 * 10 * 1 * 1000L;
-    private static final long REFRESH_EXPIRATION_MS = 60 * 60 * 24 * 1 * 1000L;
-    private static final String REISSUE_REDIRECT_URI = "/auth/reissue";
-
+    private final CookieUtil cookieUtil;
     private SecretKey secretKey;
+    private String reissueUrl;
     private final RefreshTokenRedisRepository refreshTokenRedisRepository;
     private final RedisService redisService;
 
     // application.yml에 있는 평문 secret key를 가져와 초기화하였다.
     // 여기서는 HS256으로 진행했다.
     public JwtUtil(@Value("${jwt.secret-key}") String secret,
+                   @Value("${redirect-url.reissue}") String reissueUrl,
                    RefreshTokenRedisRepository refreshTokenRedisRepository,
-                   RedisService redisService) {
+                   RedisService redisService, CookieUtil cookieUtil) {
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), SignatureAlgorithm.HS256.getJcaName());
+        this.reissueUrl = reissueUrl;
         this.refreshTokenRedisRepository = refreshTokenRedisRepository;
         this.redisService = redisService;
+        this.cookieUtil = cookieUtil;
     }
 
-    public String getTokenFromHeader(HttpServletRequest request, String headerName) {
-        String token = request.getHeader(headerName);
+    public String getTokenFromHeader(HttpServletRequest request, String name) {
+        String token = request.getHeader(name);
         log.info("token from header: {}", token);
+
+        // 토큰에 값이 존재하는 경우
         if (token != null && !token.isEmpty()) {
-            // Bearer 제거 <- oAuth2를 이용했다고 명시적으로 붙여주는 타입인데 JWT를 검증하거나 정보를 추출 시 제거해줘야한다.
-            return token.substring(7);
+            return token.substring(7); // access token은 Bearer 제거
         }
+
         return null; // 토큰이 없거나 비어있을 경우 null 반환
+    }
+
+    public String getTokenFromCookie(HttpServletRequest request, String name) {
+        Cookie[] cookies = request.getCookies();
+
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (name.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null; // 쿠키가 없거나 값이 없을 경우 null 반환
     }
 
     // accessToken인지 refreshToken인지 확인
@@ -63,7 +81,7 @@ public class JwtUtil {
                 .setSigningKey(secretKey)
                 .parseClaimsJws(token)
                 .getBody()
-                .get("category", String.class);
+                .get("tokenType", String.class);
     }
 
     // memberId 추출
@@ -110,12 +128,25 @@ public class JwtUtil {
     // 현재 날짜와 만료 날짜를 비교하여,
     // 만료 날짜가 현재 날짜보다 이전(만료O)이면 true를 반환하고, 그렇지 않으면 false(만료X)를 반환
     public Boolean isExpired(String token) {
-        Date expiration = Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
-        return expiration.before(new Date());
+        try {
+            Date expiration = Jwts.parser()
+                    .setSigningKey(secretKey)
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getExpiration();
+
+            expiration.before(new Date());
+            return false;
+        } catch (MalformedJwtException e) {
+            log.info("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
+            return false;
+        } catch (IllegalArgumentException e) {
+            log.info("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
+            return false;
+        } catch (ExpiredJwtException e) {
+            log.info("Expired JWT token, 만료된 JWT token 입니다.");
+            return true;
+        }
     }
 
     // token 유효성 검사
@@ -137,46 +168,43 @@ public class JwtUtil {
             return false;
         } catch (ExpiredJwtException e) {
             log.info("Expired JWT token, 만료된 JWT token 입니다.");
-            return true;
+            return true; // 만료된 토큰은 유효하다고 판단한 후 isExpired 메서드로 만료여부 재확인
         }
-    }
-
-    public void redirectReissueURI(HttpServletRequest request, HttpServletResponse response, TokenDTO tokenDto)
-            throws IOException {
-        HttpSession session = request.getSession();
-        session.setAttribute("access", tokenDto.getAccessToken());
-        session.setAttribute("refresh", tokenDto.getRefreshToken());
-        response.sendRedirect(REISSUE_REDIRECT_URI);
     }
 
     // access, refresh 토큰 동시에 재발급
     @Transactional
-    public TokenDTO reissueAccessToken(String refreshToken) {
-        RefreshToken findRefreshToken = refreshTokenRedisRepository.findByRefreshToken(refreshToken);
+    public AuthResponse.TokenDTO reissueToken(String refreshToken) {
+        String providerId = getProviderId(refreshToken);
+        Long memberId = getMemberId(refreshToken);
+        String permission = getPermission(refreshToken);
 
-        String providerId = getProviderId(findRefreshToken.getRefreshToken());
-        Long memberId = getMemberId(findRefreshToken.getRefreshToken());
+        // 기존의 refresh token 삭제
+        redisService.deleteValues(String.valueOf(memberId));
 
-        TokenDTO tokenDto = createAccessAndRefreshToken(memberId, providerId, findRefreshToken.getAuthority());
-//        refreshTokenRedisRepository.save(RefreshToken.builder()
-//                .id(findRefreshToken.getId())
-//                .authorities(findRefreshToken.getAuthorities())
-//                .refreshToken(tokenDto.getRefreshToken())
-//                .build());
+        AuthResponse.TokenDTO tokenDto = createAccessAndRefreshToken(memberId, providerId, permission);
 
         // redis에 있는 refresh token 새로운 refresh token으로 대체
         // update refreshToken to Redis
-        redisService.setValues(providerId, tokenDto.getRefreshToken(), Duration.ofMillis(REFRESH_EXPIRATION_MS));
+        redisService.setValues(String.valueOf(memberId), tokenDto.getRefreshToken(), Duration.ofMillis(REFRESH_DURATION_MILLIS));
 
         return tokenDto;
     }
 
-    // access, refresh Token 생성
-    public TokenDTO createAccessAndRefreshToken(Long memberId, String providerId, String permission) {
-        String accessToken = createJwt("access", memberId, providerId, permission, ACCESS_EXPIRATION_MS);
-        String refreshToken = createJwt("refresh", memberId, providerId, permission, REFRESH_EXPIRATION_MS);
+    public void redirectReissueURI(HttpServletResponse response, String refreshToken)
+            throws IOException {
+        Cookie cookie = cookieUtil.createCookie(REFRESH_KEY_NAME, refreshToken);
 
-        return TokenDTO.of(accessToken, refreshToken);
+        response.addCookie(cookie);
+        response.sendRedirect(reissueUrl);
+    }
+
+    // access, refresh Token 생성
+    public AuthResponse.TokenDTO createAccessAndRefreshToken(Long memberId, String providerId, String permission) {
+        String accessToken = createJwt(ACCESS_KEY_NAME, memberId, providerId, permission, ACCESS_DURATION_MILLIS);
+        String refreshToken = createJwt(REFRESH_KEY_NAME, memberId, providerId, permission, REFRESH_DURATION_MILLIS);
+
+        return AuthConverter.toTokenDTO(accessToken, refreshToken);
     }
 
     // JWT 발급

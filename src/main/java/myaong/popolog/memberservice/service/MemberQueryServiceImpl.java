@@ -74,4 +74,14 @@ public class MemberQueryServiceImpl implements MemberQueryService {
         return memberRepository.findPasswordById(memberId)
                 .orElseThrow(() -> new ApiException(ApiCode.MEMBER_NOT_FOUND));
     }
+
+    @Override
+    public boolean existsMemberByUsername(String username) {
+        return memberRepository.existsByUsername(username);
+    }
+
+    @Override
+    public boolean existsMemberByEmail(String email) {
+        return memberRepository.existsByEmail(email);
+    }
 }
