@@ -40,6 +40,7 @@ public class AuthController {
     private final MemberQueryService memberQueryService;
     private final AuthService authService;
 
+    @Operation(summary = "", description = "토큰 재발급")
     @GetMapping("/reissue")
     public ApiResponse<AuthResponse.ReissueDTO> reissueToken(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = cookieUtil.getCookieValue(request.getCookies(), REFRESH_KEY_NAME);
