@@ -80,14 +80,22 @@ pipeline {
         stage('Docker Run') {
             steps {
                 echo 'Pull Docker Image & Docker Image Run'
-                script {
-                    echo "On-Prem Server Username: ${env.onpremServerUsername}"
-                    echo "On-Prem Server IP: ${env.onpremServerIp}"
-                }
                 sshagent (credentials: ['onprem-ssh']) {
-                    sh "ssh -o StrictHostKeyChecking=no sujin@172.16.210.30 'docker rm -f ${env.memberImageName} || true'"
-                    sh "ssh -o StrictHostKeyChecking=no sujin@172.16.210.30 'docker ps -q --filter name=${env.memberImageName} | grep -q . && docker rm -f \$(docker ps -aq --filter name=${env.memberImageName})'"
-                    sh "ssh -o StrictHostKeyChecking=no sujin@172.16.210.30 'docker run -d --name ${env.memberImageName} -p 9083:9083 ${env.fullImageName}:latest'"
+                    // 1. 컨테이너가 존재하는 경우에만 삭제
+                    sh """
+                        ssh -o StrictHostKeyChecking=no sujin@172.16.210.30 '
+                        if [ \$(docker ps -q --filter name=${env.memberImageName}) ]; then
+                            docker rm -f ${env.memberImageName} || true
+                        fi
+                        '
+                    """
+
+                    // 2. 새로 빌드한 이미지를 실행
+                    sh """
+                        ssh -o StrictHostKeyChecking=no sujin@172.16.210.30 '
+                        docker run -d --name ${env.memberImageName} -p 9083:9083 ${env.fullImageName}:latest
+                        '
+                    """
                 }
             }
         }
