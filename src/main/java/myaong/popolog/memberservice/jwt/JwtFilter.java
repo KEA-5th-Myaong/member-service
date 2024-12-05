@@ -46,7 +46,7 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         if (!jwtUtil.validateToken(accessToken) || !jwtUtil.validateToken(refreshToken)) {
-            ApiResponse.responseErrorOnFilter(response, HttpServletResponse.SC_UNAUTHORIZED, ApiCode.INVALID_TOKEN.getCode(), ApiCode.INVALID_TOKEN.getMessage());
+            ApiResponse.responseErrorOnFilter(response, HttpServletResponse.SC_UNAUTHORIZED, ApiCode.INVALID_TOKEN);
         }
 
         filterChain.doFilter(request, response);

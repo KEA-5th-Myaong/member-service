@@ -117,6 +117,6 @@ public class NormalLoginFilter extends UsernamePasswordAuthenticationFilter {
     // 로그인 실패
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-        ApiResponse.responseErrorOnFilter(response, HttpServletResponse.SC_UNAUTHORIZED, ApiCode.FAILED_LOGIN.getCode(), ApiCode.FAILED_LOGIN.getMessage());
+        ApiResponse.responseErrorOnFilter(response, HttpServletResponse.SC_UNAUTHORIZED, ApiCode.FAILED_LOGIN);
     }
 }

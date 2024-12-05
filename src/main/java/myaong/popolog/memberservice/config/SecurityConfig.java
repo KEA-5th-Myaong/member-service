@@ -2,6 +2,7 @@ package myaong.popolog.memberservice.config;
 
 import lombok.RequiredArgsConstructor;
 import myaong.popolog.memberservice.jwt.*;
+import myaong.popolog.memberservice.oauth2.OAuth2FailureHandler;
 import myaong.popolog.memberservice.oauth2.OAuth2SuccessHandler;
 import myaong.popolog.memberservice.oauth2.service.CustomOAuth2UserService;
 import myaong.popolog.memberservice.service.RedisService;
@@ -16,11 +17,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
 
 import static myaong.popolog.memberservice.enums.Permission.*;
 
@@ -31,6 +28,7 @@ public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
+//    private final OAuth2FailureHandler oAuth2FailureHandler;
     private final JwtUtil jwtUtil;
     private final CookieUtil cookieUtil;
     private final RedisService redisService;
@@ -68,6 +66,7 @@ public class SecurityConfig {
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler(oAuth2SuccessHandler)
+//                        .failureHandler(oAuth2FailureHandler)
                 )
                 .addFilterAt(new JwtFilter(jwtUtil, requestMatcherHolder), NormalLoginFilter.class) // JwtFilter를 NormalLoginFilter 앞에 추가하여 JWT 검증을 수행
                 .addFilterAt(new NormalLoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, cookieUtil, redisService), UsernamePasswordAuthenticationFilter.class); // NormalLoginFilter를 UsernamePasswordAuthenticationFilter 앞에 추가하여 로그인 요청을 처리

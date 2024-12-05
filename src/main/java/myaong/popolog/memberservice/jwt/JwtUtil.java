@@ -116,7 +116,7 @@ public class JwtUtil {
         String providerId = getProviderId(accessToken);
         String permission = getPermission(accessToken);
 
-        OAuthUserDTO oAuthUserDTO = AuthConverter.toOAuthUserDTO(null, null, providerId, permission);
+        OAuthUserDTO oAuthUserDTO = AuthConverter.toOAuthUserDTO(null, null, providerId, permission, false);
 
         CustomOAuth2User customOAuth2User = new CustomOAuth2User(oAuthUserDTO);
 
