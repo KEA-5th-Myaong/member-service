@@ -46,13 +46,13 @@ public class ApiResponse<T> {
 	}
 
 	// filter에서 사용
-	public static void responseErrorOnFilter(HttpServletResponse response, int sc, String code, String message) throws IOException {
+	public static void responseErrorOnFilter(HttpServletResponse response, int sc, ApiCode apiCode) throws IOException {
 		response.setStatus(sc);
 
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 
-		ApiResponse responseMap = new ApiResponse<>(false, code, message, null);
+		ApiResponse responseMap = new ApiResponse<>(false, apiCode.getCode(), apiCode.getMessage(), null);
 
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);

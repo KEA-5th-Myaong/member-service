@@ -16,4 +16,6 @@ public class OAuthUserDTO {
 
     // MemberProfile에 저장될 정보
     private String name;
+
+    private Boolean duplicateEmail;
 }

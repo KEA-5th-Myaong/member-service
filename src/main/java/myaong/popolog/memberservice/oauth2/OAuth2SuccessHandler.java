@@ -17,14 +17,14 @@ import myaong.popolog.memberservice.service.MemberQueryService;
 import myaong.popolog.memberservice.service.RedisService;
 import myaong.popolog.memberservice.util.CookieUtil;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
-import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.security.sasl.AuthenticationException;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -45,12 +45,26 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final RedisService redisService;
     private final MemberQueryService memberQueryService;
 
+    @Value("${redirect-url.main}")
+    private String mainPageUrl;
+
+    @Value("${redirect-url.profile-form}")
+    private String profileFormUrl;
+
+    @Value("${redirect-url.login}")
+    private String loginPageUrl;
+
     
     @Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
     	// SecurityContext에서 Authentication 객체 꺼내기
         CustomOAuth2User customUserDetail = (CustomOAuth2User) authentication.getPrincipal();
-        
+
+        if (customUserDetail.getDuplicateEmail()) {
+            log.error("Email Duplicate!!");
+            throw new InternalAuthenticationServiceException("duplicate email");
+        }
+
         Long memberId = customUserDetail.getMemberId();
         String providerId = customUserDetail.getProviderId();
         
@@ -72,12 +86,22 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         log.info("accessToken: {}", accessToken);
         log.info("refreshToken: {}", refreshToken);
 
-        AuthResponse.LoginDTO loginDTO = AuthConverter.toLoginDTO(AUTH_TYPE + accessToken, findMember.getRequiredInfo());
+        String redirectionUrl = getRedirectionUrl(findMember.getRequiredInfo());
+
+        response.addCookie(cookieUtil.createCookie(ACCESS_KEY_NAME, accessToken));
         response.addCookie(cookieUtil.createCookie(REFRESH_KEY_NAME, refreshToken));
 
-        ApiResponse.responseSuccessOnFilter(response, ApiCode.OK.getCode(), ApiCode.OK.getMessage(), loginDTO);
+        response.sendRedirect(redirectionUrl);
     }
 
+    public String getRedirectionUrl(RequiredInfo requiredInfo) {
+        return switch (requiredInfo) {
+            case BOTH -> profileFormUrl; // 프로필과 관심직군 둘 다 입력 필요
+            case PREJOBS -> mainPageUrl; // 관심직군 입력 필요
+            case COMPLETED -> mainPageUrl; // 둘 다 입력 완료
+            default -> mainPageUrl; // 기본 URL
+        };
+    }
 
     private void saveRefreshTokenOnRedis(String memberId, String refreshToken, String permission) {
         List<SimpleGrantedAuthority> simpleGrantedAuthorities = new ArrayList<>();

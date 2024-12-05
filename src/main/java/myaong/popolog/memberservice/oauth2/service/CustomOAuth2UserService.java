@@ -1,7 +1,11 @@
 package myaong.popolog.memberservice.oauth2.service;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import myaong.popolog.memberservice.common.exception.ApiCode;
+import myaong.popolog.memberservice.common.exception.ApiException;
+import myaong.popolog.memberservice.common.exception.ApiResponse;
 import myaong.popolog.memberservice.converter.AuthConverter;
 import myaong.popolog.memberservice.entity.Member;
 import myaong.popolog.memberservice.enums.Permission;
@@ -19,6 +23,11 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.naming.AuthenticationException;
+import java.io.IOException;
 
 
 @Service
@@ -51,21 +60,27 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             return null;
         }
 
+        // TODO: 이미 존재하는 이메일일 경우 에러 처리
+        boolean duplicateEmail = memberQueryService.existsMemberByEmail(oAuth2Response.getEmail());
+
         //리소스 서버에서 발급 받은 정보로 사용자를 특정할 아이디값을 만듬
         String providerId = oAuth2Response.getProviderId();
         Member findMember = memberQueryService.findByProviderId(providerId);
 
         // 존재하지 않는 member면 회원정보를 저장하고 CustomOAuth2User 반환
         if (findMember == null) {
-            // member 저장
             Member newMember = AuthConverter.toOAuthMember(oAuth2Response, RequiredInfo.BOTH);
+            if (duplicateEmail) {
+                throw new ApiException(ApiCode.EMAIL_DUPLICATED);
+            }
+
             Member savedMember = memberCommandService.saveMember(newMember);
-
-            OAuthUserDTO oAuthUserDTO = AuthConverter.toOAuthUserDTO(oAuth2Response.getName(), savedMember.getId(), providerId, Permission.MEMBER.name());
-
+            OAuthUserDTO oAuthUserDTO = AuthConverter.toOAuthUserDTO(oAuth2Response.getName(), savedMember.getId(), providerId, Permission.MEMBER.name(), duplicateEmail);
             return new CustomOAuth2User(oAuthUserDTO);
+
         } else { // 회원정보가 존재한다면 조회된 데이터로 반환
-            OAuthUserDTO oAuthUserDTO = AuthConverter.toOAuthUserDTO(oAuth2Response.getName(), findMember.getId(), findMember.getProviderId(), findMember.getPermission().name().toLowerCase());
+            // duplicateEmail은 false 여야함
+            OAuthUserDTO oAuthUserDTO = AuthConverter.toOAuthUserDTO(oAuth2Response.getName(), findMember.getId(), findMember.getProviderId(), findMember.getPermission().name().toLowerCase(), false);
 
             return new CustomOAuth2User(oAuthUserDTO);
         }

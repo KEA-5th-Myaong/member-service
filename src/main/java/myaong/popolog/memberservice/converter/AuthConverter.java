@@ -15,12 +15,13 @@ import java.time.LocalDate;
 @Component
 public class AuthConverter {
 
-    public static OAuthUserDTO toOAuthUserDTO(String name, Long memberId, String providerId, String permission) {
+    public static OAuthUserDTO toOAuthUserDTO(String name, Long memberId, String providerId, String permission, Boolean duplicateEmail) {
         return OAuthUserDTO.builder()
                 .name(name)
                 .memberId(memberId)
                 .providerId(providerId)
                 .permission(Permission.valueOfLower(permission))
+                .duplicateEmail(duplicateEmail)
                 .build();
     }
 
