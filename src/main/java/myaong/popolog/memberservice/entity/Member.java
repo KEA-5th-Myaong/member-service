@@ -27,7 +27,7 @@ public class Member extends BaseEntity {
 	private String providerId;
 
 	// 로그인 아이디
-	@Column(name = "username", unique = true, updatable = false)
+	@Column(name = "username", unique = true)
 	private String username;
 
 	@Column(name = "password")
