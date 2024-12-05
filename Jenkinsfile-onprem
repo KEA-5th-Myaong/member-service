@@ -50,8 +50,8 @@ pipeline {
             steps {
                 echo 'Building and Pushing Docker Image'
                 script {
-                    // 1. 로컬에 존재하는 latest 태그가 붙은 도커 이미지 삭제
-                    sh "docker rmi ${env.fullImageName}:latest || true"
+                    // 1. 로컬에 존재하는 latest 태그가 붙은 도커 이미지 삭제(여기서는 이미지 이름에 사용자 이름이 안들어감)
+                    sh "docker rmi ${env.memberImageName}:latest || true"
 
                     docker.withRegistry('', registryCredential) {
                         // 2. 원격 도커 허브에서 latest 태그의 이미지 삭제
