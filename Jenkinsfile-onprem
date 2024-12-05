@@ -80,6 +80,10 @@ pipeline {
         stage('Docker Run') {
             steps {
                 echo 'Pull Docker Image & Docker Image Run'
+                script {
+                    echo "On-Prem Server Username: ${env.onpremServerUsername}"
+                    echo "On-Prem Server IP: ${env.onpremServerIp}"
+                }
                 sshagent (credentials: ['onprem-ssh']) {
                     sh "ssh -o StrictHostKeyChecking=no ${env.onpremServerUsername}@${env.onpremServerIp} 'docker rm -f ${env.memberImageName} || true'"
                     sh "ssh -o StrictHostKeyChecking=no ${env.onpremServerUsername}@${env.onpremServerIp} 'docker ps -q --filter name=${env.memberImageName} | grep -q . && docker rm -f \$(docker ps -aq --filter name=${env.memberImageName})'"
