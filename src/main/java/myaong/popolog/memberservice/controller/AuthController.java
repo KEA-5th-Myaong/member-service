@@ -46,7 +46,7 @@ public class AuthController {
         String refreshToken = cookieUtil.getCookieValue(request.getCookies(), REFRESH_KEY_NAME);
         AuthResponse.TokenDTO tokenDTO = jwtUtil.reissueToken(refreshToken);
 
-        response.addCookie(cookieUtil.createCookie(REFRESH_KEY_NAME, tokenDTO.getRefreshToken()));
+        response.addCookie(cookieUtil.createCookie(REFRESH_KEY_NAME, tokenDTO.getRefreshToken(), true));
 
         return ApiResponse.onSuccess(AuthConverter.toReissueDTO(AUTH_TYPE + tokenDTO.getAccessToken()));
     }

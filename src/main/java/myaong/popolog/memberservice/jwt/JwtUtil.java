@@ -193,7 +193,7 @@ public class JwtUtil {
 
     public void redirectReissueURI(HttpServletResponse response, String refreshToken)
             throws IOException {
-        Cookie cookie = cookieUtil.createCookie(REFRESH_KEY_NAME, refreshToken);
+        Cookie cookie = cookieUtil.createCookie(REFRESH_KEY_NAME, refreshToken, true);
 
         response.addCookie(cookie);
         response.sendRedirect(reissueUrl);

@@ -88,8 +88,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         String redirectionUrl = getRedirectionUrl(findMember.getRequiredInfo());
 
-        response.addCookie(cookieUtil.createCookie(ACCESS_KEY_NAME, accessToken));
-        response.addCookie(cookieUtil.createCookie(REFRESH_KEY_NAME, refreshToken));
+        response.addCookie(cookieUtil.createCookie(ACCESS_KEY_NAME, accessToken, false)); // 소셜 로그인에서는 access를 쿠키에 담아줘야하므로 프론트에서 꺼내서 쓸 수 있도록 httpOnly False로 설정
+        response.addCookie(cookieUtil.createCookie(REFRESH_KEY_NAME, refreshToken, true));
 
         response.sendRedirect(redirectionUrl);
     }

@@ -109,7 +109,7 @@ public class NormalLoginFilter extends UsernamePasswordAuthenticationFilter {
         log.info("refreshToken: {}", refreshToken);
 
         AuthResponse.LoginDTO loginDTO = AuthConverter.toLoginDTO(AUTH_TYPE + accessToken, member.getRequiredInfo());
-        response.addCookie(cookieUtil.createCookie(REFRESH_KEY_NAME, refreshToken));
+        response.addCookie(cookieUtil.createCookie(REFRESH_KEY_NAME, refreshToken, true));
 
         ApiResponse.responseSuccessOnFilter(response, ApiCode.OK.getCode(), ApiCode.OK.getMessage(), loginDTO);
     }
