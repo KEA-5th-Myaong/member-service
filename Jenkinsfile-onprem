@@ -4,6 +4,7 @@ pipeline {
     environment {
         registryCredential = 'docker-hub' // Docker Hub에 로그인할 때 사용할 자격 증명 ID
         dockerImage = '' // Docker 이미지 변수 초기화
+        // WARN: 여기서 초기화하면 credentials에서 받아와도 여기서 초기화한 값으로 덮어씌워짐..
         onpremServerUsername = '' // On-Prem 서버 사용자 이름 변수 초기화
         onpremServerIp = '' // On-Prem 서버 IP 주소 변수 초기화
     }

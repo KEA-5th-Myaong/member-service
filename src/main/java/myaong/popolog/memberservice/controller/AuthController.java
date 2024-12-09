@@ -23,8 +23,6 @@ import myaong.popolog.memberservice.util.CookieUtil;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
-import java.util.Optional;
 
 import static myaong.popolog.memberservice.common.Constants.*;
 
@@ -50,6 +48,8 @@ public class AuthController {
 
         return ApiResponse.onSuccess(AuthConverter.toReissueDTO(AUTH_TYPE + tokenDTO.getAccessToken()));
     }
+
+
 
     @Operation(summary = "API 명세서 v0.4 line 3", description = "로그인 아이디 중복 확인")
     @GetMapping("/check-duplicate/username")
