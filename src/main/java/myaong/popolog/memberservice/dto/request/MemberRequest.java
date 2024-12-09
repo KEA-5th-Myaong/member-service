@@ -27,7 +27,6 @@ public class MemberRequest {
 
     @Getter
     public static class UpdatePasswordDTO {
-        @PasswordFormat
         private String originPassword;
 
         @PasswordFormat
