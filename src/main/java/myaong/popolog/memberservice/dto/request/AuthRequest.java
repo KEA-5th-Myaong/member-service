@@ -1,6 +1,7 @@
 package myaong.popolog.memberservice.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 import myaong.popolog.memberservice.common.annotation.EmailFormat;
@@ -24,7 +25,7 @@ public class AuthRequest {
         private String username;
 
         @Setter
-        @PasswordFormat
+        @Size(min = 8, max = 20, message = "비밀번호는 8~20자 이어야 합니다.")
         private String password;
 
         @PasswordFormat
