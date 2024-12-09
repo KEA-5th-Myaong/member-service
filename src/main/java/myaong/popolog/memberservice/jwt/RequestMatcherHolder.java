@@ -31,6 +31,12 @@ public class RequestMatcherHolder {
         new RequestInfo(POST, "/login/**", null),
         new RequestInfo(GET, "/webjars/**",null),
 
+        // swagger
+        new RequestInfo(GET, "/api-docs/**", null),
+
+        // test
+        new RequestInfo(GET, "/tests/members/**", null),
+
         // user
         new RequestInfo(GET, "/members/**", Permission.MEMBER),
         new RequestInfo(PUT, "/members/**", Permission.MEMBER),
