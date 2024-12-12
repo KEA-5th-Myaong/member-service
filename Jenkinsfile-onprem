@@ -4,9 +4,6 @@ pipeline {
     environment {
         registryCredential = 'docker-hub' // Docker Hub에 로그인할 때 사용할 자격 증명 ID
         dockerImage = '' // Docker 이미지 변수 초기화
-        // WARN: 여기서 초기화하면 credentials에서 받아와도 여기서 초기화한 값으로 덮어씌워짐..
-        onpremServerUsername = '' // On-Prem 서버 사용자 이름 변수 초기화
-        onpremServerIp = '' // On-Prem 서버 IP 주소 변수 초기화
     }
 
     stages {
@@ -14,15 +11,14 @@ pipeline {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'docker-hub-username', variable: 'DOCKER_HUB_USERNAME'),
-                                     string(credentialsId: 'member-image-name', variable: 'MEMBER_IMAGE_NAME'),
                                      string(credentialsId: 'onprem-server-username', variable: 'ONPREM_SERVER_USERNAME'),
                                      string(credentialsId: 'onprem-server-ip', variable: 'ONPREM_SERVER_IP')]) {
                         // 환경 변수 설정
                         env.dockerHubUsername = DOCKER_HUB_USERNAME
-                        env.memberImageName = MEMBER_IMAGE_NAME
+                        env.imageName = "popolog-member-service"
                         env.onpremServerUsername = ONPREM_SERVER_USERNAME
                         env.onpremServerIp = ONPREM_SERVER_IP
-                        env.fullImageName = "${env.dockerHubUsername}/${env.memberImageName}" // fullImageName 설정
+                        env.fullImageName = "${env.dockerHubUsername}/${env.imageName}" // fullImageName 설정
                     }
                 }
             }
