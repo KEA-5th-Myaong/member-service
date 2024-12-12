@@ -44,31 +44,23 @@ pipeline {
         }
 
         stage('Build & Push Docker Image') {
-            steps {
-                echo 'Building and Pushing Docker Image'
-                script {
-                    // 1. 해당 이미지로 실행 중인 컨테이너 중지 및 삭제
-                    sh """
-                    docker ps -q --filter ancestor=${env.fullImageName}:latest | xargs -r docker stop
-                    docker ps -aq --filter ancestor=${env.fullImageName}:latest | xargs -r docker rm
-                    """
+             steps {
+                 echo 'Building and Pushing Docker Image'
+                 script {
+                     def previousBuildId = "${env.BUILD_ID.toInteger() - 1}"
+                     def newBuildId = "${env.BUILD_ID.toInteger()}"
 
-                    // 2. 로컬에 존재하는 latest 태그가 붙은 도커 이미지 삭제
-                    sh "docker rmi ${env.fullImageName}:latest || true"
+                     // 새로운 이미지 빌드 및 푸시
+                     dockerImage = docker.build("${env.fullImageName}:${newBuildId}")
+                     docker.withRegistry('', registryCredential) {
+                         dockerImage.push()
+                     }
 
-                    // 3. 원격 도커 허브에서 latest 태그의 이미지 삭제
-                    docker.withRegistry('', registryCredential) {
-                        sh "docker rmi ${env.fullImageName}:latest || true"
-                    }
-
-                    // 4. 새로 생성되는 도커 이미지의 태그를 latest로 설정하고 푸시
-                    dockerImage = docker.build("${env.fullImageName}:latest")
-                    docker.withRegistry('', registryCredential) {
-                        dockerImage.push()
-                    }
-                }
-            }
-        }
+                     // 이전 빌드 ID 태그 이미지 삭제
+                     sh "docker rmi ${env.fullImageName}:${previousBuildId} || true"
+                 }
+             }
+         }
 
         stage('Docker Run') {
             steps {
@@ -76,17 +68,17 @@ pipeline {
                 sshagent (credentials: ['onprem-ssh']) {
                     // 1. 컨테이너가 존재하는 경우에만 삭제
                     sh """
-                        ssh -o StrictHostKeyChecking=no sujin@172.16.210.30 '
-                        if [ \$(docker ps -q --filter name=${env.memberImageName}) ]; then
-                            docker rm -f ${env.memberImageName} || true
+                        ssh -o StrictHostKeyChecking=no ${env.onpremServerUsername}@${env.onpremServerIp} '
+                        if [ \$(docker ps -q --filter name=${env.imageName}) ]; then
+                            docker rm -f ${env.imageName} || true
                         fi
                         '
                     """
 
                     // 2. 새로 빌드한 이미지를 실행
                     sh """
-                        ssh -o StrictHostKeyChecking=no sujin@172.16.210.30 '
-                        docker run -d --name ${env.memberImageName} -p 9083:9083 ${env.fullImageName}:latest
+                        ssh -o StrictHostKeyChecking=no ${env.onpremServerUsername}@${env.onpremServerIp} '
+                        docker run -d --name ${env.imageName} -p 9083:9083 ${env.fullImageName}:${env.BUILD_ID.toInteger()}
                         '
                     """
                 }
