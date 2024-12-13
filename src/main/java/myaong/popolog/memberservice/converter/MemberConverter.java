@@ -20,12 +20,12 @@ public class MemberConverter {
                 .build();
     }
 
-    public static MemberProfileRequest.CreateDTO toMemberProfileCreateDTO(Long memberId, MemberRequest.AdditionalBasicInfoDTO dto) {
+    public static MemberProfileRequest.CreateDTO toMemberProfileCreateDTO(Long memberId, String username, String name, String nickname) {
         return MemberProfileRequest.CreateDTO.builder()
                 .memberId(memberId)
-                .username(dto.getUsername())
-                .name(dto.getName())
-                .nickname(dto.getNickname())
+                .username(username)
+                .name(name)
+                .nickname(nickname)
                 .build();
     }
 

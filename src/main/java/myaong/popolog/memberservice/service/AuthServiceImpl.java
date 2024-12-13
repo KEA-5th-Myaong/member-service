@@ -1,10 +1,13 @@
 package myaong.popolog.memberservice.service;
 
 import lombok.RequiredArgsConstructor;
+import myaong.popolog.memberservice.client.BlogServiceClient;
 import myaong.popolog.memberservice.common.exception.ApiCode;
 import myaong.popolog.memberservice.common.exception.ApiException;
 import myaong.popolog.memberservice.converter.AuthConverter;
+import myaong.popolog.memberservice.converter.MemberConverter;
 import myaong.popolog.memberservice.dto.request.AuthRequest;
+import myaong.popolog.memberservice.dto.request.MemberProfileRequest;
 import myaong.popolog.memberservice.dto.request.MemberRequest;
 import myaong.popolog.memberservice.entity.Member;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +24,8 @@ public class AuthServiceImpl implements AuthService {
     private final MemberQueryService memberQueryService;
     private final PasswordEncoder passwordEncoder;
     private final MemberCommandService memberCommandService;
+
+    private final BlogServiceClient blogServiceClient;
 
     @Override
     public void signUp(AuthRequest.SignUpDTO request) {
@@ -45,6 +50,16 @@ public class AuthServiceImpl implements AuthService {
 
         Member normalMember = AuthConverter.toNormalMember(request);
         memberCommandService.saveMember(normalMember);
+
+        // 회원가입시 받은 정보 MemberProfile에도 저장
+        MemberProfileRequest.CreateDTO memberProfileCreateDTO = MemberConverter.toMemberProfileCreateDTO(
+                normalMember.getId(),
+                normalMember.getUsername(),
+                request.getName(),
+                request.getNickname()
+        );
+        blogServiceClient.createMemberProfile(memberProfileCreateDTO);
+
     }
 
 }

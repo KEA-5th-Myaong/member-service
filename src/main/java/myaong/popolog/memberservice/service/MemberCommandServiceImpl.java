@@ -33,7 +33,12 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         findMember.updateUsername(request.getUsername());
 
         // Blog Service로 나머지 데이터 수정 요청, MemberProfile 저장(POST /blog/profile 호출)
-        MemberProfileRequest.CreateDTO memberProfileCreateDTO = MemberConverter.toMemberProfileCreateDTO(findMember.getId(), request);
+        MemberProfileRequest.CreateDTO memberProfileCreateDTO = MemberConverter.toMemberProfileCreateDTO(
+                findMember.getId(),
+                request.getUsername(),
+                request.getName(),
+                request.getNickname()
+        );
         blogServiceClient.createMemberProfile(memberProfileCreateDTO);
 
         // MemberProfile 정보는 입력됐으므로 관심 직군 정보만 필요
