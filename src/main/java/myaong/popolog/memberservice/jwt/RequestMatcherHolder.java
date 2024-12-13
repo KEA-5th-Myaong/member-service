@@ -50,8 +50,8 @@ public class RequestMatcherHolder {
         new RequestInfo(GET, "/error", null),
 
         // 각 Permission의 권한이 필요한 RequestInfo가 최소 1개씩은 리스트에 있어야함
-        new RequestInfo(GET, "/admin/**", Permission.ADMIN),
-        new RequestInfo(GET, "/super/**", Permission.SUPER)
+        new RequestInfo(GET, "/test/admin/**", Permission.ADMIN),
+        new RequestInfo(GET, "/test/super/**", Permission.SUPER)
     );
     private final ConcurrentHashMap<String, RequestMatcher> reqMatcherCacheMap = new ConcurrentHashMap<>();
 

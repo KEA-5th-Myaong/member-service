@@ -68,6 +68,7 @@ public class JwtUtil {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if (name.equals(cookie.getName())) {
+                    log.info("Cookie name: {}, Cookie value: {}", cookie.getName(), cookie.getValue());
                     return cookie.getValue();
                 }
             }
