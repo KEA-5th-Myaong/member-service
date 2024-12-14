@@ -81,6 +81,7 @@ pipeline {
                     sshagent (credentials: ['bastion-ssh']) {
                         sh """
                         ssh -o StrictHostKeyChecking=no ${bastionUsername}@${bastionIp} '
+                            export PATH=\$PATH:~  # kubectl을 위해 홈 디렉토리를 PATH에 추가
                             kubectl rollout restart deployment member-service -n popolog
                         '
                         """
