@@ -16,11 +16,17 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${FRONT_URL:http://172.16.210.30:3000}")
     private String frontUrl; // ConfigMap의 FRONT_URL 값을 주입받음
 
+    @Value("${WORKER1_URL:http://172.16.210.30:3000}")
+    private String worker1Url;
+
+    @Value("${WORKER2_URL:http://172.16.210.30:3000}")
+    private String worker2Url;
+
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:3000", frontUrl) 
+                .allowedOrigins("http://localhost:3000", frontUrl, worker1Url, worker2Url)
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // 허용할 HTTP 메서드
                 .allowedHeaders("*") // 모든 HTTP 헤더 허용
                 .exposedHeaders("Authorization", "Set-Cookie") // 브라우저에 노출할 응답 헤더
