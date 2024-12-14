@@ -82,6 +82,8 @@ pipeline {
                         sh """
                         ssh -o StrictHostKeyChecking=no ${bastionUsername}@${bastionIp} '
                             export PATH=\$PATH:~  # kubectl을 위해 홈 디렉토리를 PATH에 추가
+                            export OCI_CLI_CONFIG_FILE=/home/ubuntu/.oci/config  # OCI CLI 설정 파일 경로
+                            export OCI_CLI_PROFILE=DEFAULT  # 필요한 경우 프로파일 설정
                             kubectl rollout restart deployment member-service -n popolog
                         '
                         """
