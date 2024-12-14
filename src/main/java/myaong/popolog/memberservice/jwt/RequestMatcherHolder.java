@@ -44,7 +44,9 @@ public class RequestMatcherHolder {
         new RequestInfo(DELETE, "/members/**", Permission.MEMBER),
 
         // actuator
+        new RequestInfo(GET, "/actuator-member/**", null),
         new RequestInfo(GET, "/actuator/**", null),
+
 
         // static resources
         new RequestInfo(GET, "/docs/**", null),
