@@ -54,10 +54,14 @@ pipeline {
                     sh "docker tag ${env.fullImageName}:latest ${env.fullImageName}:${previousBuildId} || true"
 
                     // 2. 원격 도커 허브에서 latest 태그의 이미지 삭제
-                    sh "docker rmi ${env.fullImageName}:latest || true"
+                    docker.withRegistry('', registryCredential) {
+                        sh "docker rmi ${env.fullImageName}:latest || true"
+                    }
 
                     // 3. 1번에서 태그가 previousBuildId로 변경된 도커 이미지를 원격 도커 허브에 푸시
-                    sh "docker push ${env.fullImageName}:${previousBuildId} || true"
+                    docker.withRegistry('', registryCredential) {
+                        sh "docker push ${env.fullImageName}:${previousBuildId} || true"
+                    }
 
                     // 4. 로컬에서 previousBuildId 태그에 해당하는 이미지 삭제
                     sh "docker rmi ${env.fullImageName}:${previousBuildId} || true"
@@ -67,9 +71,6 @@ pipeline {
                     docker.withRegistry('', registryCredential) {
                         dockerImage.push()
                     }
-
-                    // 6. 로컬에서 latest 태그에 해당하는 이미지 삭제
-                    sh "docker rmi ${env.fullImageName}:latest || true"
                 }
             }
         }
