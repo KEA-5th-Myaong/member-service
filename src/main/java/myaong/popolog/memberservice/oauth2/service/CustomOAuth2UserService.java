@@ -69,7 +69,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         // 존재하지 않는 member면 회원정보를 저장하고 CustomOAuth2User 반환
         if (findMember == null) {
-            Member newMember = AuthConverter.toOAuthMember(oAuth2Response, RequiredInfo.BOTH);
+            Member newMember = AuthConverter.toOAuthMember(oAuth2Response, RequiredInfo.PROFILE);
             if (duplicateEmail) {
                 throw new ApiException(ApiCode.EMAIL_DUPLICATED);
             }

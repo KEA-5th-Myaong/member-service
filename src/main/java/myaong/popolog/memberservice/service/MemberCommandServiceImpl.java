@@ -42,7 +42,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         blogServiceClient.createMemberProfile(memberProfileCreateDTO);
 
         // MemberProfile 정보는 입력됐으므로 관심 직군 정보만 필요
-        findMember.updateRequiredInfo(RequiredInfo.PREJOBS);
+        findMember.updateRequiredInfo(RequiredInfo.COMPLETED);
     }
 
     @Override

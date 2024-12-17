@@ -52,7 +52,7 @@ public class AuthConverter {
                 .permission(Permission.MEMBER)
                 .countAttempt(0)
                 .unbanDate(LocalDate.now())
-                .requiredInfo(RequiredInfo.PREJOBS)
+                .requiredInfo(RequiredInfo.COMPLETED)
                 .build();
 
     }
