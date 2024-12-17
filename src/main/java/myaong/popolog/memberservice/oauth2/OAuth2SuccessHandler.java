@@ -4,10 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import myaong.popolog.memberservice.common.exception.ApiCode;
-import myaong.popolog.memberservice.common.exception.ApiResponse;
-import myaong.popolog.memberservice.converter.AuthConverter;
-import myaong.popolog.memberservice.dto.response.AuthResponse;
 import myaong.popolog.memberservice.entity.Member;
 import myaong.popolog.memberservice.entity.RefreshToken;
 import myaong.popolog.memberservice.enums.RequiredInfo;
@@ -24,7 +20,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
-import javax.security.sasl.AuthenticationException;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -96,8 +91,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
     public String getRedirectionUrl(RequiredInfo requiredInfo) {
         return switch (requiredInfo) {
-            case BOTH -> profileFormUrl; // 프로필과 관심직군 둘 다 입력 필요
-            case PREJOBS -> mainPageUrl; // 관심직군 입력 필요
+            case PROFILE -> profileFormUrl; // 프로필과 관심직군 둘 다 입력 필요
             case COMPLETED -> mainPageUrl; // 둘 다 입력 완료
             default -> mainPageUrl; // 기본 URL
         };
