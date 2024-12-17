@@ -62,7 +62,11 @@ pipeline {
                         sh "docker push ${env.fullImageName}:${previousBuildId} || true"
                     }
 
-                    // 4. 새로 생성되는 도커 이미지의 태그를 latest로 설정하고 푸시
+                    // 4. 로컬에서 previousBuildId 태그와 latest 태그가 붙은 이미지 삭제
+                    sh "docker rmi ${env.fullImageName}:${previousBuildId} || true"
+                    sh "docker rmi ${env.fullImageName}:latest || true"
+
+                    // 5. 새로 생성되는 도커 이미지의 태그를 latest로 설정하고 푸시
                     dockerImage = docker.build("${env.fullImageName}:latest")
                     docker.withRegistry('', registryCredential) {
                         dockerImage.push()
@@ -70,7 +74,6 @@ pipeline {
                 }
             }
         }
-
 
     }
 
