@@ -47,6 +47,9 @@ pipeline {
             steps {
                 echo 'Building and Pushing Docker Image'
                 script {
+                    def newBuildId = "${env.BUILD_ID}" // 현재 빌드 ID를 사용
+                    def previousBuildId = "${env.BUILD_ID.toInteger() - 1}" // 이전 빌드 ID
+
                     // 새로운 이미지 빌드 및 푸시
                     dockerImage = docker.build("${env.fullImageName}:${newBuildId}")
                     docker.withRegistry('', registryCredential) {
@@ -55,6 +58,7 @@ pipeline {
 
                     // 이전 빌드 ID 태그 이미지 삭제
                     sh "docker rmi ${env.fullImageName}:${previousBuildId} || true"
+                    sh "docker rmi ${env.fullImageName}:${newBuildId} || true"
                 }
             }
         }
