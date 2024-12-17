@@ -47,13 +47,14 @@ pipeline {
             steps {
                 echo 'Building and Pushing Docker Image'
                 script {
-                    // 새로 생성되는 도커 이미지의 태그를 latest로 설정하고 푸시
-                    dockerImage = docker.build("${env.fullImageName}:latest")
+                    // 새로운 이미지 빌드 및 푸시
+                    dockerImage = docker.build("${env.fullImageName}:${newBuildId}")
                     docker.withRegistry('', registryCredential) {
                         dockerImage.push()
                     }
 
-                    sh "docker rmi ${env.fullImageName}:latest || true"
+                    // 이전 빌드 ID 태그 이미지 삭제
+                    sh "docker rmi ${env.fullImageName}:${previousBuildId} || true"
                 }
             }
         }
